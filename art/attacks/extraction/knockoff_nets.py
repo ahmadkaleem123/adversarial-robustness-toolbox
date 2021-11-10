@@ -205,7 +205,6 @@ class KnockoffNets(ExtractionAttack):
             nb_actions = len(np.unique(y))
         else:
             raise ValueError("Target values `y` has a wrong shape.")
-
         # We need to keep an average version of the victim output
         if self.reward == "div" or self.reward == "all":
             self.y_avg = np.zeros(self.estimator.nb_classes)
@@ -217,19 +216,22 @@ class KnockoffNets(ExtractionAttack):
 
         # Implement the bandit gradients algorithm
         h_func = np.zeros(nb_actions)
-        learning_rate = np.zeros(nb_actions)
-        probs = np.ones(nb_actions) / nb_actions
+        learning_rate = np.ones(nb_actions)
+        probs = np.ones(nb_actions) / nb_actions  # corresponds to pi in the paper
+        #print("nb actions", nb_actions)
         selected_x = []
         queried_labels = []
 
         avg_reward = 0.0
-        for iteration in trange(1, self.nb_stolen + 1, desc="Knock-off nets", disable=not self.verbose):
+        for iteration in trange(1, self.nb_stolen, desc="Knock-off nets", disable=not self.verbose):   #nb_stolen + 1
             # Sample an action
             action = np.random.choice(np.arange(0, nb_actions), p=probs)
-
+            #print("action", action)
             # Sample data to attack
             sampled_x = self._sample_data(x, y, action)
             selected_x.append(sampled_x)
+            #print("sampled", sampled_x)
+
 
             # Query the victim classifier
             y_output = self.estimator.predict(x=np.array([sampled_x]), batch_size=self.batch_size_query)
@@ -248,27 +250,32 @@ class KnockoffNets(ExtractionAttack):
 
             # Test new labels
             y_hat = thieved_classifier.predict(x=np.array([sampled_x]), batch_size=self.batch_size_query)
-
+            #print("y hat", y_hat)
             # Compute rewards
             reward = self._reward(y_output, y_hat, iteration)
             avg_reward = avg_reward + (1.0 / iteration) * (reward - avg_reward)
 
             # Update learning rate
-            learning_rate[action] += 1
-
+            learning_rate[action] += 1 # Actually corresponds to N(z) in the paper so the name is rather misleading. The learning rate specified in the paper is 1/learning_rate as they have in the code below 
+            #print("h before ", h_func)
             # Update H function
             for i_action in range(nb_actions):
                 if i_action != action:
                     h_func[i_action] = (
-                        h_func[i_action] - 1.0 / learning_rate[action] * (reward - avg_reward) * probs[i_action]
+                        h_func[i_action] - (1.0 / learning_rate[action]) * (reward - avg_reward) * probs[i_action]
                     )
                 else:
-                    h_func[i_action] = h_func[i_action] + 1.0 / learning_rate[action] * (reward - avg_reward) * (
+                    h_func[i_action] = h_func[i_action] + (1.0 / learning_rate[action]) * (reward - avg_reward) * (
                         1 - probs[i_action]
                     )
-
             # Update probs
-            aux_exp = np.exp(h_func)
+            aux_exp = np.exp(h_func)  # probs can become NaN from here. H_func is the first to get nan values.
+            #print("h ", h_func)
+            #print("aux", aux_exp)
+            # as long as h_func does not grow too large, probs should be fine because it is normalized so all values are between 0 and 1.
+            #print("aux", aux_exp)
+            # print("y out", y_output)
+            # print("y hat", y_hat)
             probs = aux_exp / np.sum(aux_exp)
 
         # Train the thieved classifier the final time
@@ -359,18 +366,21 @@ class KnockoffNets(ExtractionAttack):
         :return: Reward value.
         """
         # Compute victim probs
-        aux_exp = np.exp(y_output[0])
-        probs_output = aux_exp / np.sum(aux_exp)
+        aux_exp = np.exp(y_output[0])   # why are we using y_output[0] only
+        probs_output = aux_exp / np.sum(aux_exp)   # could this be 0 and causing the nan???
 
         # Compute thieved probs
-        aux_exp = np.exp(y_hat[0])
+        aux_exp = np.exp(y_hat[0])  # overflow happens here sometimes i.e. y_hat becomes too big?
         probs_hat = aux_exp / np.sum(aux_exp)
 
         # Compute reward
         reward = 0
         for k in range(self.estimator.nb_classes):
-            reward += -probs_output[k] * np.log(probs_hat[k])
-
+            if probs_hat[k] > 0.01:
+                reward += -probs_output[k] * np.log(probs_hat[k]) # divide by zero here
+            else:
+                reward += 0   # to avoid nan. Should this be 0?
+        #print("Reward_loss", reward)
         return reward
 
     def _reward_all(self, y_output: np.ndarray, y_hat: np.ndarray, n: int) -> np.ndarray:
@@ -388,9 +398,10 @@ class KnockoffNets(ExtractionAttack):
         reward = [reward_cert, reward_div, reward_loss]
         self.reward_avg = self.reward_avg + (1.0 / n) * (reward - self.reward_avg)
         self.reward_var = self.reward_var + (1.0 / n) * ((reward - self.reward_avg) ** 2 - self.reward_var)
-
+        #print("val", self.reward_var)
+        #print("type", type(self.reward_var))
         # Normalize rewards
-        if n > 1:
+        if n > 1 and np.count_nonzero(self.reward_var) == 3:  # prevent division by zero.
             reward = (reward - self.reward_avg) / np.sqrt(self.reward_var)
         else:
             reward = [max(min(r, 1), 0) for r in reward]

@@ -12,7 +12,8 @@ import numpy as np
 from art.attacks.evasion import FastGradientMethod
 from art.estimators.classification import PyTorchClassifier
 from art.utils import load_mnist
-
+# import sys
+# sys.path.append('/ssd003/home/akaleem/adversarial-robustness-toolbox')
 
 # Step 0: Define the neural network model, return logits instead of activation in forward method
 
