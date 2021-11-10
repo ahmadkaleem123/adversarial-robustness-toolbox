@@ -36,9 +36,9 @@ from torchvision import datasets, transforms
 
 logger = logging.getLogger(__name__)
 
-BATCH_SIZE = 10
+BATCH_SIZE = 64
 NB_EPOCHS = 100
-NB_STOLEN = 500
+NB_STOLEN = 2000
 
 
 class TestKnockoffNets(TestBase):
@@ -83,7 +83,7 @@ class TestKnockoffNets(TestBase):
         print("Training Victim")
         victim_ptc.fit(  # train the victim
             x=self.x_train_mnist,
-            y=self.y_train_mnist,
+            y=base_dataset.targets,
             batch_size=64,
             nb_epochs=100,
         )
@@ -98,7 +98,7 @@ class TestKnockoffNets(TestBase):
         # Create thieved classifier
         thieved_ptc = get_image_classifier_pt(load_init=False)
 
-        # # Create random attack
+        # Create random attack
         attack = KnockoffNets(
             classifier=victim_ptc,
             batch_size_fit=BATCH_SIZE,
@@ -106,7 +106,7 @@ class TestKnockoffNets(TestBase):
             nb_epochs=NB_EPOCHS,
             nb_stolen=NB_STOLEN,
             sampling_strategy="random",
-            verbose=False,
+            verbose=True,
         )
 
         #thieved_ptc = attack.extract(x=self.x_train_mnist, thieved_classifier=thieved_ptc) # mnist on mnist
@@ -126,7 +126,6 @@ class TestKnockoffNets(TestBase):
 
         print("Fidelity Accuracy", acc)
         print("Standard Accuracy", count/len(thieved_preds))
-        #print("victim", count2)
         #self.assertGreater(acc, 0.3)
 
         # Create adaptive attack
@@ -148,7 +147,7 @@ class TestKnockoffNets(TestBase):
             nb_stolen=NB_STOLEN,
             sampling_strategy="adaptive",
             reward="all",
-            verbose=False,
+            verbose=True,
         )
         #thieved_ptc = attack.extract(x=self.x_train_mnist, y=self.y_train_mnist, thieved_classifier=thieved_ptc) # with mnist on mnist
         thieved_ptc = attack.extract(x=self.x_train_cifar10, y=self.y_train_cifar10, thieved_classifier=thieved_ptc) # cifar 10 to attack mnist
@@ -161,6 +160,7 @@ class TestKnockoffNets(TestBase):
         for i in range(len(thieved_preds)):
             if base_datasettest.targets[i] == thieved_preds[i]:
                 count += 1
+
         print("Fidelity Accuracy", acc)
         print("Target Accuracy", count / len(victim_preds))
         #print("victim", count2)

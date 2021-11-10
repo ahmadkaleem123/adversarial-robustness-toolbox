@@ -49,7 +49,7 @@ class TestBase(unittest.TestCase):
     def setUpClass(cls):
         master_seed(1234)
 
-        cls.n_train = 1000  # Increase this for better victim model
+        cls.n_train = 10000  # Increase this for better victim model
         cls.n_test = 1000
         cls.batch_size = 16
 

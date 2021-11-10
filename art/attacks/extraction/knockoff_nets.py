@@ -357,6 +357,12 @@ class KnockoffNets(ExtractionAttack):
 
         return reward
 
+    def stablesoftmax(self, x):
+        """Compute the softmax of vector x in a numerically stable way."""
+        shiftx = x - np.max(x)
+        exps = np.exp(shiftx)
+        return exps / np.sum(exps)
+
     def _reward_loss(self, y_output: np.ndarray, y_hat: np.ndarray) -> float:
         """
         Compute `loss` reward value.
@@ -365,21 +371,26 @@ class KnockoffNets(ExtractionAttack):
         :param y_hat: Output of the thieved classifier.
         :return: Reward value.
         """
-        # Compute victim probs
-        aux_exp = np.exp(y_output[0])   # why are we using y_output[0] only
-        probs_output = aux_exp / np.sum(aux_exp)   # could this be 0 and causing the nan???
+        # # Compute victim probs
+        # aux_exp = np.exp(y_output[0])   # why are we using y_output[0] only
+        # #print("aux", aux_exp)
+        # probs_output = aux_exp / np.sum(aux_exp)   # could this be 0 and causing the nan???
+        probs_output = self.stablesoftmax(y_output[0])
 
-        # Compute thieved probs
-        aux_exp = np.exp(y_hat[0])  # overflow happens here sometimes i.e. y_hat becomes too big?
-        probs_hat = aux_exp / np.sum(aux_exp)
-
+        # # Compute thieved probs
+        # aux_exp = np.exp(y_hat[0])  # overflow happens here sometimes i.e. y_hat becomes too big?
+        # probs_hat = aux_exp / np.sum(aux_exp)
+        probs_hat = self.stablesoftmax(y_hat[0])
+        #print("probs hat", probs_hat)
         # Compute reward
         reward = 0
         for k in range(self.estimator.nb_classes):
-            if probs_hat[k] > 0.01:
-                reward += -probs_output[k] * np.log(probs_hat[k]) # divide by zero here
-            else:
-                reward += 0   # to avoid nan. Should this be 0?
+            reward += -probs_output[k] * np.log(probs_hat[k])
+            #print("reward", reward)
+            # if probs_hat[k] > 0.01:
+            #     reward += -probs_output[k] * np.log(probs_hat[k]) # divide by zero here
+            # else:
+            #     reward += 0   # to avoid nan. Should this be 0?
         #print("Reward_loss", reward)
         return reward
 
