@@ -1162,7 +1162,7 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
         #model = ResNet(BasicBlock, [3, 4, 6, 3])
         model = ResNet(BasicBlock, [2, 2, 2, 2]) # ResNet 18
         # Add below from now on
-        model.load_state_dict(torch.load("model3.pth.tar"))
+        #model.load_state_dict(torch.load("model2.pth.tar"))
         # import dfmenetwork
         # model = dfmenetwork.resnet_8x.ResNet34_8x(num_classes=10)
         # device = torch.device("cuda:0"  if torch.cuda.is_available() else "cpu")
@@ -1173,7 +1173,7 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
 
     # Define a loss function and optimizer
     loss_fn = torch.nn.CrossEntropyLoss(reduction="mean") # sum
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
     optimizer2 = torch.optim.SGD(model.parameters(), lr=0.001, momentum = 0.9)
     # Get classifier
     if dataset == "mnist" or dataset == None:
