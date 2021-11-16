@@ -216,14 +216,14 @@ class KnockoffNets(ExtractionAttack):
 
         # Implement the bandit gradients algorithm
         h_func = np.zeros(nb_actions)
-        learning_rate = np.ones(nb_actions)
+        learning_rate = np.zeros(nb_actions)
         probs = np.ones(nb_actions) / nb_actions  # corresponds to pi in the paper
         #print("nb actions", nb_actions)
         selected_x = []
         queried_labels = []
 
         avg_reward = 0.0
-        for iteration in trange(1, self.nb_stolen, desc="Knock-off nets", disable=not self.verbose):   #nb_stolen + 1
+        for iteration in trange(1, self.nb_stolen+1, desc="Knock-off nets", disable=not self.verbose):   #nb_stolen + 1
             # Sample an action
             action = np.random.choice(np.arange(0, nb_actions), p=probs)
             #print("action", action)
@@ -245,7 +245,7 @@ class KnockoffNets(ExtractionAttack):
                 y=fake_label,
                 batch_size=self.batch_size_fit,
                 nb_epochs=1,
-                verbose=0,
+                verbose=1,
             )
 
             # Test new labels
@@ -385,7 +385,10 @@ class KnockoffNets(ExtractionAttack):
         # Compute reward
         reward = 0
         for k in range(self.estimator.nb_classes):
-            reward += -probs_output[k] * np.log(probs_hat[k])
+            if probs_hat[k] == 0:
+                reward += -probs_output[k] * -50
+            else:
+                reward += -probs_output[k] * np.log(probs_hat[k])
             #print("reward", reward)
             # if probs_hat[k] > 0.01:
             #     reward += -probs_output[k] * np.log(probs_hat[k]) # divide by zero here
@@ -412,7 +415,7 @@ class KnockoffNets(ExtractionAttack):
         #print("val", self.reward_var)
         #print("type", type(self.reward_var))
         # Normalize rewards
-        if n > 1 and np.count_nonzero(self.reward_var) == 3:  # prevent division by zero.
+        if n > 1: # and np.count_nonzero(self.reward_var) == 3:  # prevent division by zero.
             reward = (reward - self.reward_avg) / np.sqrt(self.reward_var)
         else:
             reward = [max(min(r, 1), 0) for r in reward]

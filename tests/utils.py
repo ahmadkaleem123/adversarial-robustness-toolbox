@@ -24,6 +24,7 @@ import json
 import logging
 import os
 import pickle
+import random
 import time
 import unittest
 import warnings
@@ -49,23 +50,23 @@ class TestBase(unittest.TestCase):
     def setUpClass(cls):
         master_seed(1234)
 
-        cls.n_train = 10000  # Increase this for better victim model
+        cls.n_train = 50000  # Increase this for better victim model
         cls.n_test = 1000
-        cls.batch_size = 16
+        cls.batch_size = 64
 
         cls.create_image_dataset(n_train=cls.n_train, n_test=cls.n_test)
 
-        (x_train_iris, y_train_iris), (x_test_iris, y_test_iris), _, _ = load_dataset("iris")
-
-        cls.x_train_iris = x_train_iris
-        cls.y_train_iris = y_train_iris
-        cls.x_test_iris = x_test_iris
-        cls.y_test_iris = y_test_iris
-
-        cls._x_train_iris_original = cls.x_train_iris.copy()
-        cls._y_train_iris_original = cls.y_train_iris.copy()
-        cls._x_test_iris_original = cls.x_test_iris.copy()
-        cls._y_test_iris_original = cls.y_test_iris.copy()
+        # (x_train_iris, y_train_iris), (x_test_iris, y_test_iris), _, _ = load_dataset("iris")
+        #
+        # cls.x_train_iris = x_train_iris
+        # cls.y_train_iris = y_train_iris
+        # cls.x_test_iris = x_test_iris
+        # cls.y_test_iris = y_test_iris
+        #
+        # cls._x_train_iris_original = cls.x_train_iris.copy()
+        # cls._y_train_iris_original = cls.y_train_iris.copy()
+        # cls._x_test_iris_original = cls.x_test_iris.copy()
+        # cls._y_test_iris_original = cls.y_test_iris.copy()
 
         # Filter warning for scipy, removed with scipy 1.4
         warnings.filterwarnings("ignore", ".*the output shape of zoom.*")
@@ -79,21 +80,55 @@ class TestBase(unittest.TestCase):
         cls.x_test_mnist = x_test_mnist[:n_test]
         cls.y_test_mnist = y_test_mnist[:n_test]
 
-        cls._x_train_mnist_original = cls.x_train_mnist.copy()
-        cls._y_train_mnist_original = cls.y_train_mnist.copy()
-        cls._x_test_mnist_original = cls.x_test_mnist.copy()
-        cls._y_test_mnist_original = cls.y_test_mnist.copy()
+        # cls._x_train_mnist_original = cls.x_train_mnist.copy()
+        # cls._y_train_mnist_original = cls.y_train_mnist.copy()
+        # cls._x_test_mnist_original = cls.x_test_mnist.copy()
+        # cls._y_test_mnist_original = cls.y_test_mnist.copy()
 
         (x_train_cifar10, y_train_cifar10), (x_test_cifar10, y_test_cifar10), _, _ = load_dataset("cifar10")
-        cls.x_train_cifar10 = x_train_cifar10[:n_train] 
+        indices = np.random.choice(len(x_train_cifar10), n_train, replace=False)
+        indices2 = np.random.choice(len(x_test_cifar10), n_test, replace=False)
+        cls.x_train_cifar10 = x_train_cifar10[:n_train]
         cls.y_train_cifar10 = y_train_cifar10[:n_train]
         cls.x_test_cifar10 = x_test_cifar10[:n_test]
         cls.y_test_cifar10 = y_test_cifar10[:n_test]
+        # cls.x_train_cifar10 = np.take(x_train_cifar10, indices, axis=0)
+        # cls.y_train_cifar10 = np.take(y_train_cifar10, indices, axis=0)
+        # cls.x_test_cifar10 = np.take(x_test_cifar10, indices2, axis=0)
+        # cls.y_test_cifar10 = np.take(y_test_cifar10, indices2, axis=0)
 
-        cls._x_train_cifar10_original = cls.x_train_cifar10.copy()
-        cls._y_train_cifar10_original = cls.y_train_cifar10.copy()
-        cls._x_test_cifar10_original = cls.x_test_cifar10.copy()
-        cls._y_test_cifar10_original = cls.y_test_cifar10.copy()
+        # cls._x_train_cifar10_original = cls.x_train_cifar10.copy()
+        # cls._y_train_cifar10_original = cls.y_train_cifar10.copy()
+        # cls._x_test_cifar10_original = cls.x_test_cifar10.copy()
+        # cls._y_test_cifar10_original = cls.y_test_cifar10.copy()
+
+        (x_train_cifar100, y_train_cifar100), (x_test_cifar100, y_test_cifar100), _, _ = load_dataset("cifar100")
+        indices = np.random.choice(len(x_train_cifar100), n_train, replace=False)
+        indices2 = np.random.choice(len(x_test_cifar100), n_test, replace=False)
+        # cls.x_train_cifar100 = x_train_cifar100[:n_train]
+        # cls.y_train_cifar100 = y_train_cifar100[:n_train]
+        # cls.x_test_cifar100 = x_test_cifar100[:n_test]
+        # cls.y_test_cifar100 = y_test_cifar100[:n_test]
+        cls.x_train_cifar100 = np.take(x_train_cifar100, indices, axis=0)
+        cls.y_train_cifar100 = np.take(y_train_cifar100, indices, axis=0)
+        cls.x_test_cifar100 = np.take(x_test_cifar100, indices2, axis=0)
+        cls.y_test_cifar100 = np.take(y_test_cifar100, indices2, axis=0)
+
+        # cls._x_train_cifar100_original = cls.x_train_cifar100.copy()
+        # cls._y_train_cifar100_original = cls.y_train_cifar100.copy()
+        # cls._x_test_cifar100_original = cls.x_test_cifar100.copy()
+        # cls._y_test_cifar100_original = cls.y_test_cifar100.copy()
+
+        (x_train_svhn, y_train_svhn), (x_test_svhn, y_test_svhn), _, _ = load_dataset("svhn")
+        cls.x_train_svhn = x_train_svhn[:n_train] 
+        cls.y_train_svhn = y_train_svhn[:n_train]
+        cls.x_test_svhn = x_test_svhn[:n_test]
+        cls.y_test_svhn = y_test_svhn[:n_test]
+
+        # cls._x_train_svhn_original = cls.x_train_svhn.copy()
+        # cls._y_train_svhn_original = cls.y_train_svhn.copy()
+        # cls._x_test_svhn_original = cls.x_test_svhn.copy()
+        # cls._y_test_svhn_original = cls.y_test_svhn.copy()
 
     def setUp(self):
         self.time_start = time.time()
@@ -967,98 +1002,98 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
                 x = F.relu(self.fc1(x))
                 x = self.fc2(x)
                 return x
-    ### ResNet architecure (not currently in use)
-    # elif dataset == "cifar10":
-    #     class BasicBlock(torch.nn.Module):
-    #         expansion = 1
+    ### ResNet architecture for CIFAR
+    elif dataset == "cifar10":
+        class BasicBlock(torch.nn.Module):
+            expansion = 1
 
-    #         def __init__(self, in_planes, planes, stride=1):
-    #             super(BasicBlock, self).__init__()
-    #             self.conv1 = torch.nn.Conv2d(in_planes, planes, kernel_size=3, stride=stride,
-    #                                 padding=1, bias=False)
-    #             self.bn1 = torch.nn.BatchNorm2d(planes)
-    #             self.conv2 = torch.nn.Conv2d(planes, planes, kernel_size=3, stride=1,
-    #                                 padding=1, bias=False)
-    #             self.bn2 = torch.nn.BatchNorm2d(planes)
+            def __init__(self, in_planes, planes, stride=1):
+                super(BasicBlock, self).__init__()
+                self.conv1 = torch.nn.Conv2d(in_planes, planes, kernel_size=3, stride=stride,
+                                    padding=1, bias=False)
+                self.bn1 = torch.nn.BatchNorm2d(planes)
+                self.conv2 = torch.nn.Conv2d(planes, planes, kernel_size=3, stride=1,
+                                    padding=1, bias=False)
+                self.bn2 = torch.nn.BatchNorm2d(planes)
 
-    #             self.shortcut = torch.nn.Sequential()
-    #             if stride != 1 or in_planes != self.expansion * planes:
-    #                 self.shortcut = torch.nn.Sequential(
-    #                     torch.nn.Conv2d(in_planes, self.expansion * planes, kernel_size=1,
-    #                             stride=stride, bias=False),
-    #                     torch.nn.BatchNorm2d(self.expansion * planes)
-    #                 )
+                self.shortcut = torch.nn.Sequential()
+                if stride != 1 or in_planes != self.expansion * planes:
+                    self.shortcut = torch.nn.Sequential(
+                        torch.nn.Conv2d(in_planes, self.expansion * planes, kernel_size=1,
+                                stride=stride, bias=False),
+                        torch.nn.BatchNorm2d(self.expansion * planes)
+                    )
 
-    #         def forward(self, x):
-    #             out = F.relu(self.bn1(self.conv1(x)))
-    #             out = self.bn2(self.conv2(out))
-    #             out += self.shortcut(x)
-    #             out = F.relu(out)
-    #             return out
+            def forward(self, x):
+                out = F.relu(self.bn1(self.conv1(x)))
+                out = self.bn2(self.conv2(out))
+                out += self.shortcut(x)
+                out = F.relu(out)
+                return out
 
 
-    #     class Bottleneck(torch.nn.Module):
-    #         expansion = 4
+        class Bottleneck(torch.nn.Module):
+            expansion = 4
 
-    #         def __init__(self, in_planes, planes, stride=1):
-    #             super(Bottleneck, self).__init__()
-    #             self.conv1 = torch.nn.Conv2d(in_planes, planes, kernel_size=1, bias=False)
-    #             self.bn1 = torch.nn.BatchNorm2d(planes)
-    #             self.conv2 = torch.nn.Conv2d(planes, planes, kernel_size=3, stride=stride,
-    #                                 padding=1, bias=False)
-    #             self.bn2 = torch.nn.BatchNorm2d(planes)
-    #             self.conv3 = torch.nn.Conv2d(planes, self.expansion * planes, kernel_size=1,
-    #                                 bias=False)
-    #             self.bn3 = torch.nn.BatchNorm2d(self.expansion * planes)
+            def __init__(self, in_planes, planes, stride=1):
+                super(Bottleneck, self).__init__()
+                self.conv1 = torch.nn.Conv2d(in_planes, planes, kernel_size=1, bias=False)
+                self.bn1 = torch.nn.BatchNorm2d(planes)
+                self.conv2 = torch.nn.Conv2d(planes, planes, kernel_size=3, stride=stride,
+                                    padding=1, bias=False)
+                self.bn2 = torch.nn.BatchNorm2d(planes)
+                self.conv3 = torch.nn.Conv2d(planes, self.expansion * planes, kernel_size=1,
+                                    bias=False)
+                self.bn3 = torch.nn.BatchNorm2d(self.expansion * planes)
 
-    #             self.shortcut = torch.nn.Sequential()
-    #             if stride != 1 or in_planes != self.expansion * planes:
-    #                 self.shortcut = torch.nn.Sequential(
-    #                     torch.nn.Conv2d(in_planes, self.expansion * planes, kernel_size=1,
-    #                             stride=stride, bias=False),
-    #                     torch.nn.BatchNorm2d(self.expansion * planes)
-    #                 )
+                self.shortcut = torch.nn.Sequential()
+                if stride != 1 or in_planes != self.expansion * planes:
+                    self.shortcut = torch.nn.Sequential(
+                        torch.nn.Conv2d(in_planes, self.expansion * planes, kernel_size=1,
+                                stride=stride, bias=False),
+                        torch.nn.BatchNorm2d(self.expansion * planes)
+                    )
 
-    #         def forward(self, x):
-    #             out = F.relu(self.bn1(self.conv1(x)))
-    #             out = F.relu(self.bn2(self.conv2(out)))
-    #             out = self.bn3(self.conv3(out))
-    #             out += self.shortcut(x)
-    #             out = F.relu(out)
-    #             return out
-    #     class ResNet(torch.nn.Module):
-    #         def __init__(self, block, num_blocks, num_classes=10, name=''):
-    #             super(ResNet, self).__init__()
-    #             self.in_planes = 64
-    #             self.name = name
-    #             self.num_classes = num_classes
-    #             self.conv1 = torch.nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1,
-    #                                 bias=False)
-    #             self.bn1 = torch.nn.BatchNorm2d(64)
-    #             self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=1)
-    #             self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
-    #             self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
-    #             self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
-    #             self.linear = torch.nn.Linear(512 * block.expansion, num_classes)
+            def forward(self, x):
+                out = F.relu(self.bn1(self.conv1(x)))
+                out = F.relu(self.bn2(self.conv2(out)))
+                out = self.bn3(self.conv3(out))
+                out += self.shortcut(x)
+                out = F.relu(out)
+                return out
+        class ResNet(torch.nn.Module):
+            def __init__(self, block, num_blocks, num_classes=10, name=''):
+                super(ResNet, self).__init__()
+                self.in_planes = 64
+                self.name = name
+                self.num_classes = num_classes
+                self.conv1 = torch.nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1,
+                                    bias=False)
+                self.bn1 = torch.nn.BatchNorm2d(64)
+                self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=1)
+                self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
+                self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
+                self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
+                self.linear = torch.nn.Linear(512 * block.expansion, num_classes)
 
-    #         def _make_layer(self, block, planes, num_blocks, stride):
-    #             strides = [stride] + [1] * (num_blocks - 1)
-    #             layers = []
-    #             for stride in strides:
-    #                 layers.append(block(self.in_planes, planes, stride))
-    #                 self.in_planes = planes * block.expansion
-    #             return torch.nn.Sequential(*layers)
+            def _make_layer(self, block, planes, num_blocks, stride):
+                strides = [stride] + [1] * (num_blocks - 1)
+                layers = []
+                for stride in strides:
+                    layers.append(block(self.in_planes, planes, stride))
+                    self.in_planes = planes * block.expansion
+                return torch.nn.Sequential(*layers)
 
-    #         def forward(self, x):
-    #             out = F.relu(self.bn1(self.conv1(x)))
-    #             out = self.layer1(out)
-    #             out = self.layer2(out)
-    #             out = self.layer3(out)
-    #             out = self.layer4(out)
-    #             out = F.avg_pool2d(out, 4)
-    #             out = out.view(out.size(0), -1)
-    #             out = self.linear(out)
-    #             return out
+            def forward(self, x):
+                out = F.relu(self.bn1(self.conv1(x)))
+                out = self.layer1(out)
+                out = self.layer2(out)
+                out = self.layer3(out)
+                out = self.layer4(out)
+                out = F.avg_pool2d(out, 4)
+                out = out.view(out.size(0), -1)
+                out = self.linear(out)
+                return out
     # class Model(torch.nn.Module):
     #     """
     #     Create model for pytorch.
@@ -1123,22 +1158,32 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
     # Define the network
     if dataset == None or dataset == "mnist":
         model = Model()
-    # elif dataset == "cifar10":
-    #     model = ResNet(BasicBlock, [3, 4, 6, 3])
+    elif dataset == "cifar10" and load_init:
+        #model = ResNet(BasicBlock, [3, 4, 6, 3])
+        model = ResNet(BasicBlock, [2, 2, 2, 2]) # ResNet 18
+        # Add below from now on
+        model.load_state_dict(torch.load("model3.pth.tar"))
+        # import dfmenetwork
+        # model = dfmenetwork.resnet_8x.ResNet34_8x(num_classes=10)
+        # device = torch.device("cuda:0"  if torch.cuda.is_available() else "cpu")
+        # model.load_state_dict(torch.load('/ssd003/home/akaleem/capc-learning-main/dfmodels/teacher/cifar10-resnet34_8x.pt', map_location=device))
+        # model.eval()
+    elif dataset == "cifar10":
+        model = ResNet(BasicBlock, [2, 2, 2, 2])
 
     # Define a loss function and optimizer
-    loss_fn = torch.nn.CrossEntropyLoss(reduction="sum")
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-
+    loss_fn = torch.nn.CrossEntropyLoss(reduction="mean") # sum
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    optimizer2 = torch.optim.SGD(model.parameters(), lr=0.001, momentum = 0.9)
     # Get classifier
     if dataset == "mnist" or dataset == None:
         ptc = PyTorchClassifier(
             model=model, loss=loss_fn, optimizer=optimizer, input_shape=(1, 28, 28), nb_classes=10, clip_values=(0, 1)
         )
-    # elif dataset == "cifar10":
-    #     ptc = PyTorchClassifier(
-    #         model=model, loss=loss_fn, optimizer=optimizer, input_shape=(3, 32, 32), nb_classes=10, clip_values=(0, 1)
-    #     )
+    elif dataset == "cifar10":
+        ptc = PyTorchClassifier(
+            model=model, loss=loss_fn, optimizer=optimizer, input_shape=(3, 32, 32), nb_classes=10, clip_values=(0, 1)
+        )
     return ptc
 
 
@@ -1662,69 +1707,67 @@ def get_tabular_classifier_pt(load_init=True):
     """
     import torch
 
-    from art.estimators.classification.pytorch import PyTorchClassifier
+    from art.estimators.classification.pytorch import PyTorch
+    """
+    Create Iris model for PyTorch.
 
-    class Model(torch.nn.Module):
-        """
-        Create Iris model for PyTorch.
+    The weights and biases are identical to the TensorFlow model in `get_iris_classifier_tf`.
+    """
 
-        The weights and biases are identical to the TensorFlow model in `get_iris_classifier_tf`.
-        """
+    def __init__(self):
+        super(Model, self).__init__()
 
-        def __init__(self):
-            super(Model, self).__init__()
+        self.fully_connected1 = torch.nn.Linear(4, 10)
+        self.fully_connected2 = torch.nn.Linear(10, 10)
+        self.fully_connected3 = torch.nn.Linear(10, 3)
 
-            self.fully_connected1 = torch.nn.Linear(4, 10)
-            self.fully_connected2 = torch.nn.Linear(10, 10)
-            self.fully_connected3 = torch.nn.Linear(10, 3)
-
-            if load_init:
-                w_dense1 = np.load(
-                    os.path.join(
-                        os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "W_DENSE1_IRIS.npy"
-                    )
+        if load_init:
+            w_dense1 = np.load(
+                os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "W_DENSE1_IRIS.npy"
                 )
-                b_dense1 = np.load(
-                    os.path.join(
-                        os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "B_DENSE1_IRIS.npy"
-                    )
+            )
+            b_dense1 = np.load(
+                os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "B_DENSE1_IRIS.npy"
                 )
-                w_dense2 = np.load(
-                    os.path.join(
-                        os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "W_DENSE2_IRIS.npy"
-                    )
+            )
+            w_dense2 = np.load(
+                os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "W_DENSE2_IRIS.npy"
                 )
-                b_dense2 = np.load(
-                    os.path.join(
-                        os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "B_DENSE2_IRIS.npy"
-                    )
+            )
+            b_dense2 = np.load(
+                os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "B_DENSE2_IRIS.npy"
                 )
-                w_dense3 = np.load(
-                    os.path.join(
-                        os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "W_DENSE3_IRIS.npy"
-                    )
+            )
+            w_dense3 = np.load(
+                os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "W_DENSE3_IRIS.npy"
                 )
-                b_dense3 = np.load(
-                    os.path.join(
-                        os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "B_DENSE3_IRIS.npy"
-                    )
+            )
+            b_dense3 = np.load(
+                os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "B_DENSE3_IRIS.npy"
                 )
+            )
 
-                self.fully_connected1.weight = torch.nn.Parameter(torch.Tensor(np.transpose(w_dense1)))
-                self.fully_connected1.bias = torch.nn.Parameter(torch.Tensor(b_dense1))
-                self.fully_connected2.weight = torch.nn.Parameter(torch.Tensor(np.transpose(w_dense2)))
-                self.fully_connected2.bias = torch.nn.Parameter(torch.Tensor(b_dense2))
-                self.fully_connected3.weight = torch.nn.Parameter(torch.Tensor(np.transpose(w_dense3)))
-                self.fully_connected3.bias = torch.nn.Parameter(torch.Tensor(b_dense3))
+            self.fully_connected1.weight = torch.nn.Parameter(torch.Tensor(np.transpose(w_dense1)))
+            self.fully_connected1.bias = torch.nn.Parameter(torch.Tensor(b_dense1))
+            self.fully_connected2.weight = torch.nn.Parameter(torch.Tensor(np.transpose(w_dense2)))
+            self.fully_connected2.bias = torch.nn.Parameter(torch.Tensor(b_dense2))
+            self.fully_connected3.weight = torch.nn.Parameter(torch.Tensor(np.transpose(w_dense3)))
+            self.fully_connected3.bias = torch.nn.Parameter(torch.Tensor(b_dense3))
 
-        # pylint: disable=W0221
-        # disable pylint because of API requirements for function
-        def forward(self, x):
-            x = self.fully_connected1(x)
-            x = self.fully_connected2(x)
-            logit_output = self.fully_connected3(x)
+    # pylint: disable=W0221
+    # disable pylint because of API requirements for function
+    def forward(self, x):
+        x = self.fully_connected1(x)
+        x = self.fully_connected2(x)
+        logit_output = self.fully_connected3(x)
 
-            return logit_output
+        return logit_output
 
     # Define the network
     model = Model()

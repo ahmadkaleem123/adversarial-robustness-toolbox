@@ -759,8 +759,9 @@ def load_cifar10(
         temp1 = data[:, 0, :, :].reshape(data.shape[0], 1, 32, 32)
         temp2 = data[:, 1, :, :].reshape(data.shape[0], 1, 32, 32)
         temp3 = data[:, 2, :, :].reshape(data.shape[0], 1, 32, 32)
-        data = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3 # rgb to grayscale for mnist
-        data = data[:, :, 0:28, 0:28] # convert to 28x28
+        # Add these back when using mnist
+        #data = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3 # rgb to grayscale for mnist
+        #data = data[:, :, 2:30, 2:30] # convert to 28x28
         return data, labels
 
     path = get_file(
@@ -772,8 +773,8 @@ def load_cifar10(
 
     num_train_samples = 50000
 
-    #x_train = np.zeros((num_train_samples, 3, 32, 32), dtype=np.uint8)
-    x_train = np.zeros((num_train_samples, 1, 28, 28), dtype=np.uint8)
+    x_train = np.zeros((num_train_samples, 3, 32, 32), dtype=np.uint8)
+    #x_train = np.zeros((num_train_samples, 1, 28, 28), dtype=np.uint8)
     y_train = np.zeros((num_train_samples,), dtype=np.uint8)
 
     for i in range(1, 6):
@@ -831,6 +832,11 @@ def load_cifar100(
         labels = content["labels"]
 
         data = data.reshape(data.shape[0], 3, 32, 32)
+        # temp1 = data[:, 0, :, :].reshape(data.shape[0], 1, 32, 32)
+        # temp2 = data[:, 1, :, :].reshape(data.shape[0], 1, 32, 32)
+        # temp3 = data[:, 2, :, :].reshape(data.shape[0], 1, 32, 32)
+        # data = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3 # rgb to grayscale for mnist
+        # data = data[:, :, 2:30, 2:30] # convert to 28x28
         return data, labels
 
     path = get_file(
@@ -902,6 +908,70 @@ def load_mnist(
         x_test, y_test = preprocess(x_test, y_test)
 
     return (x_train, y_train), (x_test, y_test), min_, max_
+
+def load_svhn(
+    raw: bool = False,
+) -> DATASET_TYPE:
+    """
+    Loads CIFAR10 dataset from config.CIFAR10_PATH or downloads it if necessary.
+
+    ALSO converts it to mnist style (temporary)
+
+    :param raw: `True` if no preprocessing should be applied to the data. Otherwise, data is normalized to 1.
+    :return: `(x_train, y_train), (x_test, y_test), min, max`
+    """
+
+    from scipy.io import loadmat
+    path1 = "/ssd003/home/akaleem/data/SVHN/train_32x32.mat"
+    path2 = "/ssd003/home/akaleem/data/SVHN/test_32x32.mat"
+    train_raw = loadmat(path1)
+    test_raw = loadmat(path2)
+
+    num_train_samples = 50000
+
+    # x_train = np.zeros((num_train_samples, 3, 32, 32), dtype=np.uint8)
+    # #x_train = np.zeros((num_train_samples, 1, 28, 28), dtype=np.uint8)
+    # y_train = np.zeros((num_train_samples,), dtype=np.uint8)
+
+    x_train = np.array(train_raw['X'])
+    y_train = np.array(train_raw['y'])
+
+    x_test = np.array(test_raw["X"])
+    y_test = np.array(test_raw['y'])
+
+    x_train = x_train.reshape(x_train.shape[3], 3, 32, 32)
+    x_test = x_test.reshape(x_test.shape[3], 3, 32, 32)
+
+    temp1 = x_train[:, 0, :, :].reshape(x_train.shape[0], 1, 32, 32)
+    temp2 = x_train[:, 1, :, :].reshape(x_train.shape[0], 1, 32, 32)
+    temp3 = x_train[:, 2, :, :].reshape(x_train.shape[0], 1, 32, 32)
+    x_train = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3 # rgb to grayscale for mnist
+    x_train = x_train[:, :, 2:30, 2:30] # convert to 28x28
+
+    temp1 = x_test[:, 0, :, :].reshape(x_test.shape[0], 1, 32, 32)
+    temp2 = x_test[:, 1, :, :].reshape(x_test.shape[0], 1, 32, 32)
+    temp3 = x_test[:, 2, :, :].reshape(x_test.shape[0], 1, 32, 32)
+    x_test = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3 # rgb to grayscale for mnist
+    x_test = x_test[:, :, 2:30, 2:30] # convert to 28x28
+
+
+    # Set channels last
+    # x_train = x_train.transpose((0, 2, 3, 1))
+    # x_test = x_test.transpose((0, 2, 3, 1))
+    y_train = np.reshape(y_train, (len(y_train), 1))
+    y_test = np.reshape(y_test, (len(y_test), 1))
+    y_train = y_train - 1
+    y_test = y_test - 1  # svhn labels are weird
+    # y_train = y_train.astype(int)
+    # y_test = y_test.astype(int)
+    min_, max_ = 0.0, 255.0
+    if not raw:
+        min_, max_ = 0.0, 1.0
+        x_train, y_train = preprocess(x_train, y_train, clip_values=(0, 255))
+        x_test, y_test = preprocess(x_test, y_test, clip_values=(0, 255))
+
+    return (x_train, y_train), (x_test, y_test), min_, max_
+
 
 
 def load_stl() -> DATASET_TYPE:
@@ -1156,6 +1226,8 @@ def load_dataset(
         return load_cifar10()
     if "cifar100" in name:
         return load_cifar100()
+    if "svhn" in name:
+        return load_svhn()
     if "stl10" in name:
         return load_stl()
     if "iris" in name:
