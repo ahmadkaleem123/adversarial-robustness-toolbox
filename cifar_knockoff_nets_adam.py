@@ -19,62 +19,53 @@ from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
 import logging
-import unittest
-from tests.utils import create_image_dataset
-
 import numpy as np
-
-from art.attacks.extraction.knockoff_nets import KnockoffNets
-from art.estimators.estimator import BaseEstimator
-from art.estimators.classification.classifier import ClassifierMixin
-
-from tests.utils import TestBase, master_seed
-from tests.utils import get_image_classifier_pt
-from tests.utils import get_tabular_classifier_pt
-from tests.attacks.utils import backend_test_classifier_type_check_fail
-
+import torch
 import torchvision
-from torchvision import datasets, transforms
+from torchvision import transforms
+from art.attacks.extraction.knockoff_nets import KnockoffNets
+
+from tests.utils import get_image_classifier_pt
+from tests.utils import master_seed
 
 logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 64
 NB_EPOCHS = 100  # make 200
 NB_STOLEN = 2000
+
 f = open("logs.txt", "w")
-global victim_ptc
 
 
-class TestKnockoffNets(TestBase):
-    """
-    A unittest class for testing the KnockoffNets attack.
-    """
+class KnockoffNetsAttackRun:
 
-    @classmethod
-    def setUpClass(cls):
+    def __init__(self):
+        print('KnockoffNets Run')
+
+    def run(self):
         master_seed(seed=1234, set_tensorflow=True)
-        super().setUpClass()
 
-    def setUp(self):
-        super().setUp()
-
-    def test_4_pytorch_classifier(self):
         """
-        Using CIFAR10 as the victim model and CIFAR100 as the attacker's dataset
+        Third test with the PyTorchClassifier. (using cifar100 on cifar10)
         :return:
         """
-        self.x_train_cifar10, self.y_train_cifar10, self.x_test_cifar10, self.y_test_cifar10 = create_image_dataset(n_train=50000, n_test=1000, dataset="cifar10")
-        self.x_train_cifar100, self.y_train_cifar100, self.x_test_cifar100, self.y_test_cifar100 = create_image_dataset(
-            n_train=50000, n_test=1000, dataset="cifar100")
-        self.x_train_cifar10 = np.reshape(self.x_train_cifar10, (self.x_train_cifar10.shape[0], 3, 32, 32)).astype(np.float32)
-        self.x_test_cifar10 = np.reshape(self.x_test_cifar10,
-                            (self.x_test_cifar10.shape[0], 3, 32, 32)).astype(
-            np.float32)
-        self.x_train_cifar100 = np.reshape(self.x_train_cifar100, (self.x_train_cifar100.shape[0], 3, 32, 32)).astype(np.float32)
-        self.x_test_cifar100 = np.reshape(self.x_test_cifar100,
-                            (self.x_test_cifar100.shape[0], 3, 32, 32)).astype(
+        self.x_train_cifar10 = np.reshape(self.x_train_cifar10, (
+            self.x_train_cifar10.shape[0], 3, 32, 32)).astype(np.float32)
+
+        self.x_test_cifar10 = np.reshape(
+            self.x_test_cifar10,
+            (self.x_test_cifar10.shape[0], 3, 32,
+             32)).astype(
             np.float32)
 
+        self.x_train_cifar100 = np.reshape(self.x_train_cifar100, (
+            self.x_train_cifar100.shape[0], 3, 32, 32)).astype(np.float32)
+
+        self.x_test_cifar100 = np.reshape(
+            self.x_test_cifar100,
+            (self.x_test_cifar100.shape[0], 3, 32,
+             32)).astype(
+            np.float32)
 
         transform = transforms.Compose([
             transforms.Pad(4),
@@ -97,17 +88,17 @@ class TestKnockoffNets(TestBase):
 
         # Build PyTorchClassifier
         victim_ptc = get_image_classifier_pt(dataset="cifar10")
+
         print("Starting Training")
         f.write("Starting training\n")
-
         victim_ptc.fit(  # train the victim and save
             x=self.x_train_cifar10,
             y=self.y_train_cifar10,
             batch_size=128,
-            nb_epochs=300,
+            nb_epochs=10,
         )
-        import torch
-        torch.save(victim_ptc.model.state_dict(), "model2.pth.tar")
+        torch.save(victim_ptc.model.state_dict(), "model3.pth.tar")
+        # victim_ptc.load_state_dict(torch.load("model3.pth.tar"))
 
         count2 = 0
         victim_preds = np.argmax(victim_ptc.predict(x=self.x_test_cifar10),
@@ -157,39 +148,41 @@ class TestKnockoffNets(TestBase):
 
         # Create adaptive attack
 
-        # self.x_train_cifar10 = np.reshape(self.x_train_cifar10, (self.x_train_cifar10.shape[0], 1, 28, 28)).astype(np.float32)
-        # print("shape", self.x_train_cifar10.shape)
-        # thieved_ptc = get_image_classifier_pt(load_init=False, dataset="cifar10")
-        #
-        # print("Starting Adaptive attack")
-        # attack = KnockoffNets(
-        #     classifier=victim_ptc,
-        #     batch_size_fit=BATCH_SIZE,
-        #     batch_size_query=BATCH_SIZE,
-        #     nb_epochs=50,
-        #     nb_stolen=NB_STOLEN,
-        #     sampling_strategy="adaptive",
-        #     reward="all",
-        #     verbose=True,
-        # )
-        # thieved_ptc = attack.extract(x=self.x_train_cifar100, y=self.y_train_cifar100, thieved_classifier=thieved_ptc)
-        #
-        # thieved_preds = np.argmax(thieved_ptc.predict(x=self.x_test_cifar10), axis=1)
-        # acc = np.sum(victim_preds == thieved_preds) / len(victim_preds)
-        # count = 0
-        # count2 = 0
-        # for i in range(len(thieved_preds)):
-        #     if base_datasettest.targets[i] == thieved_preds[i]:
-        #         count += 1
-        # print("Fidelity Accuracy", acc)
-        # print("Target Accuracy", count / len(victim_preds))
-        # f.write(f"Adaptive accuracy: {count / len(victim_preds)}")
-        f.close()
+        self.x_train_cifar10 = np.reshape(self.x_train_cifar10, (
+            self.x_train_cifar10.shape[0], 1, 28, 28)).astype(np.float32)
+        print("shape", self.x_train_cifar10.shape)
+        thieved_ptc = get_image_classifier_pt(load_init=False,
+                                              dataset="cifar10")
 
-    def test_1_classifier_type_check_fail(self):
-        backend_test_classifier_type_check_fail(KnockoffNets, [BaseEstimator,
-                                                               ClassifierMixin])
+        print("Starting Adaptive attack")
+        attack = KnockoffNets(
+            classifier=victim_ptc,
+            batch_size_fit=BATCH_SIZE,
+            batch_size_query=BATCH_SIZE,
+            nb_epochs=50,
+            nb_stolen=NB_STOLEN,
+            sampling_strategy="adaptive",
+            reward="all",
+            verbose=True,
+        )
+        thieved_ptc = attack.extract(x=self.x_train_cifar100,
+                                     y=self.y_train_cifar100,
+                                     thieved_classifier=thieved_ptc)
+
+        thieved_preds = np.argmax(thieved_ptc.predict(x=self.x_test_cifar10),
+                                  axis=1)
+        acc = np.sum(victim_preds == thieved_preds) / len(victim_preds)
+        count = 0
+        for i in range(len(thieved_preds)):
+            if base_datasettest.targets[i] == thieved_preds[i]:
+                count += 1
+        print("Fidelity Accuracy", acc)
+        print("Target Accuracy", count / len(victim_preds))
+        f.write(f"Adaptive accuracy: {count / len(victim_preds)}")
+        f.close()
 
 
 if __name__ == "__main__":
-    unittest.main()
+    print('start')
+    knockoff = KnockoffNetsAttackRun()
+    knockoff.run()
