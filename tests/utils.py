@@ -41,120 +41,150 @@ logger = logging.getLogger(__name__)
 art_supported_frameworks = ["keras", "tensorflow", "tensorflow2v1", "pytorch", "scikitlearn"]
 
 
-class TestBase(unittest.TestCase):
-    """
-    This class implements the base class for all unit tests.
-    """
+# class TestBase(unittest.TestCase):
+#     """
+#     This class implements the base class for all unit tests.
+#     """
+#
+#     @classmethod
+#     def setUpClass(cls):
+#         master_seed(1234)
+#
+#         cls.n_train = 50000  # Increase this for better victim model
+#         cls.n_test = 1000
+#         cls.batch_size = 64
+#
+#         cls.create_image_dataset(n_train=cls.n_train, n_test=cls.n_test)
+#
+#         # (x_train_iris, y_train_iris), (x_test_iris, y_test_iris), _, _ = load_dataset("iris")
+#         #
+#         # cls.x_train_iris = x_train_iris
+#         # cls.y_train_iris = y_train_iris
+#         # cls.x_test_iris = x_test_iris
+#         # cls.y_test_iris = y_test_iris
+#         #
+#         # cls._x_train_iris_original = cls.x_train_iris.copy()
+#         # cls._y_train_iris_original = cls.y_train_iris.copy()
+#         # cls._x_test_iris_original = cls.x_test_iris.copy()
+#         # cls._y_test_iris_original = cls.y_test_iris.copy()
+#
+#         # Filter warning for scipy, removed with scipy 1.4
+#         warnings.filterwarnings("ignore", ".*the output shape of zoom.*")
+#
+#     @classmethod
+#     def create_image_dataset(cls, n_train, n_test):
+#         (x_train_mnist, y_train_mnist), (x_test_mnist, y_test_mnist), _, _ = load_dataset("mnist")
+#         # include code to randomkly shuffle this
+#         cls.x_train_mnist = x_train_mnist[:n_train]
+#         cls.y_train_mnist = y_train_mnist[:n_train]
+#         cls.x_test_mnist = x_test_mnist[:n_test]
+#         cls.y_test_mnist = y_test_mnist[:n_test]
+#
+#         # cls._x_train_mnist_original = cls.x_train_mnist.copy()
+#         # cls._y_train_mnist_original = cls.y_train_mnist.copy()
+#         # cls._x_test_mnist_original = cls.x_test_mnist.copy()
+#         # cls._y_test_mnist_original = cls.y_test_mnist.copy()
+#
+#         (x_train_cifar10, y_train_cifar10), (x_test_cifar10, y_test_cifar10), _, _ = load_dataset("cifar10")
+#         indices = np.random.choice(len(x_train_cifar10), n_train, replace=False)
+#         indices2 = np.random.choice(len(x_test_cifar10), n_test, replace=False)
+#         cls.x_train_cifar10 = x_train_cifar10[:n_train]
+#         cls.y_train_cifar10 = y_train_cifar10[:n_train]
+#         cls.x_test_cifar10 = x_test_cifar10[:n_test]
+#         cls.y_test_cifar10 = y_test_cifar10[:n_test]
+#         # cls.x_train_cifar10 = np.take(x_train_cifar10, indices, axis=0)
+#         # cls.y_train_cifar10 = np.take(y_train_cifar10, indices, axis=0)
+#         # cls.x_test_cifar10 = np.take(x_test_cifar10, indices2, axis=0)
+#         # cls.y_test_cifar10 = np.take(y_test_cifar10, indices2, axis=0)
+#
+#         # cls._x_train_cifar10_original = cls.x_train_cifar10.copy()
+#         # cls._y_train_cifar10_original = cls.y_train_cifar10.copy()
+#         # cls._x_test_cifar10_original = cls.x_test_cifar10.copy()
+#         # cls._y_test_cifar10_original = cls.y_test_cifar10.copy()
+#
+#         (x_train_cifar100, y_train_cifar100), (x_test_cifar100, y_test_cifar100), _, _ = load_dataset("cifar100")
+#         indices = np.random.choice(len(x_train_cifar100), n_train, replace=False)
+#         indices2 = np.random.choice(len(x_test_cifar100), n_test, replace=False)
+#         # cls.x_train_cifar100 = x_train_cifar100[:n_train]
+#         # cls.y_train_cifar100 = y_train_cifar100[:n_train]
+#         # cls.x_test_cifar100 = x_test_cifar100[:n_test]
+#         # cls.y_test_cifar100 = y_test_cifar100[:n_test]
+#         cls.x_train_cifar100 = np.take(x_train_cifar100, indices, axis=0)
+#         cls.y_train_cifar100 = np.take(y_train_cifar100, indices, axis=0)
+#         cls.x_test_cifar100 = np.take(x_test_cifar100, indices2, axis=0)
+#         cls.y_test_cifar100 = np.take(y_test_cifar100, indices2, axis=0)
+#
+#         # cls._x_train_cifar100_original = cls.x_train_cifar100.copy()
+#         # cls._y_train_cifar100_original = cls.y_train_cifar100.copy()
+#         # cls._x_test_cifar100_original = cls.x_test_cifar100.copy()
+#         # cls._y_test_cifar100_original = cls.y_test_cifar100.copy()
+#
+#         (x_train_svhn, y_train_svhn), (x_test_svhn, y_test_svhn), _, _ = load_dataset("svhn")
+#         cls.x_train_svhn = x_train_svhn[:n_train]
+#         cls.y_train_svhn = y_train_svhn[:n_train]
+#         cls.x_test_svhn = x_test_svhn[:n_test]
+#         cls.y_test_svhn = y_test_svhn[:n_test]
+#
+#         # cls._x_train_svhn_original = cls.x_train_svhn.copy()
+#         # cls._y_train_svhn_original = cls.y_train_svhn.copy()
+#         # cls._x_test_svhn_original = cls.x_test_svhn.copy()
+#         # cls._y_test_svhn_original = cls.y_test_svhn.copy()
+#
+#     def setUp(self):
+#         self.time_start = time.time()
+#         print("\n\n\n----------------------------------------------------------------------")
+#
+#     def tearDown(self):
+#         time_end = time.time() - self.time_start
+#         test_name = ".".join(self.id().split(" ")[0].split(".")[-2:])
+#         logger.info("%s: completed in %.3f seconds" % (test_name, time_end))
+#
+#         # Check that the test data has not been modified, only catches changes in attack.generate if self has been used
+#         # np.testing.assert_array_almost_equal(
+#         #     self._x_train_mnist_original[0 : self.n_train], self.x_train_mnist, decimal=3
+#         # )
+#         # np.testing.assert_array_almost_equal(
+#         #     self._y_train_mnist_original[0 : self.n_train], self.y_train_mnist, decimal=3
+#         # )
+#         # np.testing.assert_array_almost_equal(self._x_test_mnist_original[0 : self.n_test], self.x_test_mnist, decimal=3)
+#         # np.testing.assert_array_almost_equal(self._y_test_mnist_original[0 : self.n_test], self.y_test_mnist, decimal=3)
+#
+#         # np.testing.assert_array_almost_equal(self._x_train_iris_original, self.x_train_iris, decimal=3)
+#         # np.testing.assert_array_almost_equal(self._y_train_iris_original, self.y_train_iris, decimal=3)
+#         # np.testing.assert_array_almost_equal(self._x_test_iris_original, self.x_test_iris, decimal=3)
+#         # np.testing.assert_array_almost_equal(self._y_test_iris_original, self.y_test_iris, decimal=3)
+#
 
-    @classmethod
-    def setUpClass(cls):
-        master_seed(1234)
-
-        cls.n_train = 50000  # Increase this for better victim model
-        cls.n_test = 1000
-        cls.batch_size = 64
-
-        cls.create_image_dataset(n_train=cls.n_train, n_test=cls.n_test)
-
-        # (x_train_iris, y_train_iris), (x_test_iris, y_test_iris), _, _ = load_dataset("iris")
-        #
-        # cls.x_train_iris = x_train_iris
-        # cls.y_train_iris = y_train_iris
-        # cls.x_test_iris = x_test_iris
-        # cls.y_test_iris = y_test_iris
-        #
-        # cls._x_train_iris_original = cls.x_train_iris.copy()
-        # cls._y_train_iris_original = cls.y_train_iris.copy()
-        # cls._x_test_iris_original = cls.x_test_iris.copy()
-        # cls._y_test_iris_original = cls.y_test_iris.copy()
-
-        # Filter warning for scipy, removed with scipy 1.4
-        warnings.filterwarnings("ignore", ".*the output shape of zoom.*")
-
-    @classmethod
-    def create_image_dataset(cls, n_train, n_test):
-        (x_train_mnist, y_train_mnist), (x_test_mnist, y_test_mnist), _, _ = load_dataset("mnist")
-        # include code to randomkly shuffle this
-        cls.x_train_mnist = x_train_mnist[:n_train]
-        cls.y_train_mnist = y_train_mnist[:n_train]
-        cls.x_test_mnist = x_test_mnist[:n_test]
-        cls.y_test_mnist = y_test_mnist[:n_test]
-
-        # cls._x_train_mnist_original = cls.x_train_mnist.copy()
-        # cls._y_train_mnist_original = cls.y_train_mnist.copy()
-        # cls._x_test_mnist_original = cls.x_test_mnist.copy()
-        # cls._y_test_mnist_original = cls.y_test_mnist.copy()
-
-        (x_train_cifar10, y_train_cifar10), (x_test_cifar10, y_test_cifar10), _, _ = load_dataset("cifar10")
-        indices = np.random.choice(len(x_train_cifar10), n_train, replace=False)
-        indices2 = np.random.choice(len(x_test_cifar10), n_test, replace=False)
-        cls.x_train_cifar10 = x_train_cifar10[:n_train]
-        cls.y_train_cifar10 = y_train_cifar10[:n_train]
-        cls.x_test_cifar10 = x_test_cifar10[:n_test]
-        cls.y_test_cifar10 = y_test_cifar10[:n_test]
-        # cls.x_train_cifar10 = np.take(x_train_cifar10, indices, axis=0)
-        # cls.y_train_cifar10 = np.take(y_train_cifar10, indices, axis=0)
-        # cls.x_test_cifar10 = np.take(x_test_cifar10, indices2, axis=0)
-        # cls.y_test_cifar10 = np.take(y_test_cifar10, indices2, axis=0)
-
-        # cls._x_train_cifar10_original = cls.x_train_cifar10.copy()
-        # cls._y_train_cifar10_original = cls.y_train_cifar10.copy()
-        # cls._x_test_cifar10_original = cls.x_test_cifar10.copy()
-        # cls._y_test_cifar10_original = cls.y_test_cifar10.copy()
-
-        (x_train_cifar100, y_train_cifar100), (x_test_cifar100, y_test_cifar100), _, _ = load_dataset("cifar100")
-        indices = np.random.choice(len(x_train_cifar100), n_train, replace=False)
-        indices2 = np.random.choice(len(x_test_cifar100), n_test, replace=False)
-        # cls.x_train_cifar100 = x_train_cifar100[:n_train]
-        # cls.y_train_cifar100 = y_train_cifar100[:n_train]
-        # cls.x_test_cifar100 = x_test_cifar100[:n_test]
-        # cls.y_test_cifar100 = y_test_cifar100[:n_test]
-        cls.x_train_cifar100 = np.take(x_train_cifar100, indices, axis=0)
-        cls.y_train_cifar100 = np.take(y_train_cifar100, indices, axis=0)
-        cls.x_test_cifar100 = np.take(x_test_cifar100, indices2, axis=0)
-        cls.y_test_cifar100 = np.take(y_test_cifar100, indices2, axis=0)
-
-        # cls._x_train_cifar100_original = cls.x_train_cifar100.copy()
-        # cls._y_train_cifar100_original = cls.y_train_cifar100.copy()
-        # cls._x_test_cifar100_original = cls.x_test_cifar100.copy()
-        # cls._y_test_cifar100_original = cls.y_test_cifar100.copy()
-
-        (x_train_svhn, y_train_svhn), (x_test_svhn, y_test_svhn), _, _ = load_dataset("svhn")
-        cls.x_train_svhn = x_train_svhn[:n_train] 
-        cls.y_train_svhn = y_train_svhn[:n_train]
-        cls.x_test_svhn = x_test_svhn[:n_test]
-        cls.y_test_svhn = y_test_svhn[:n_test]
-
-        # cls._x_train_svhn_original = cls.x_train_svhn.copy()
-        # cls._y_train_svhn_original = cls.y_train_svhn.copy()
-        # cls._x_test_svhn_original = cls.x_test_svhn.copy()
-        # cls._y_test_svhn_original = cls.y_test_svhn.copy()
-
-    def setUp(self):
-        self.time_start = time.time()
-        print("\n\n\n----------------------------------------------------------------------")
-
-    def tearDown(self):
-        time_end = time.time() - self.time_start
-        test_name = ".".join(self.id().split(" ")[0].split(".")[-2:])
-        logger.info("%s: completed in %.3f seconds" % (test_name, time_end))
-
-        # Check that the test data has not been modified, only catches changes in attack.generate if self has been used
-        # np.testing.assert_array_almost_equal(
-        #     self._x_train_mnist_original[0 : self.n_train], self.x_train_mnist, decimal=3
-        # )
-        # np.testing.assert_array_almost_equal(
-        #     self._y_train_mnist_original[0 : self.n_train], self.y_train_mnist, decimal=3
-        # )
-        # np.testing.assert_array_almost_equal(self._x_test_mnist_original[0 : self.n_test], self.x_test_mnist, decimal=3)
-        # np.testing.assert_array_almost_equal(self._y_test_mnist_original[0 : self.n_test], self.y_test_mnist, decimal=3)
-
-        # np.testing.assert_array_almost_equal(self._x_train_iris_original, self.x_train_iris, decimal=3)
-        # np.testing.assert_array_almost_equal(self._y_train_iris_original, self.y_train_iris, decimal=3)
-        # np.testing.assert_array_almost_equal(self._x_test_iris_original, self.x_test_iris, decimal=3)
-        # np.testing.assert_array_almost_equal(self._y_test_iris_original, self.y_test_iris, decimal=3)
-
-
+def create_image_dataset(n_train, n_test, dataset):
+    if dataset == "mnist":
+        (x_train_mnist, y_train_mnist), (
+        x_test_mnist, y_test_mnist), _, _ = load_dataset("mnist")
+        x_train = x_train_mnist[:n_train]
+        y_train = y_train_mnist[:n_train]
+        x_test = x_test_mnist[:n_test]
+        y_test = y_test_mnist[:n_test]
+    elif dataset == "svhn":
+        (x_train_svhn, y_train_svhn), (
+        x_test_svhn, y_test_svhn), _, _ = load_dataset("svhn")
+        x_train = x_train_svhn[:n_train]
+        y_train = y_train_svhn[:n_train]
+        x_test = x_test_svhn[:n_test]
+        y_test = y_test_svhn[:n_test]
+    elif dataset == "cifar10":
+        (x_train_cifar10, y_train_cifar10), (
+        x_test_cifar10, y_test_cifar10), _, _ = load_dataset("cifar10")
+        x_train = x_train_cifar10[:n_train]
+        y_train = y_train_cifar10[:n_train]
+        x_test = x_test_cifar10[:n_test]
+        y_test = y_test_cifar10[:n_test]
+    elif dataset == "cifar100":
+        (x_train_cifar100, y_train_cifar100), (
+        x_test_cifar100, y_test_cifar100), _, _ = load_dataset("cifar100")
+        x_train = x_train_cifar100[:n_train]
+        y_train = y_train_cifar100[:n_train]
+        x_test = x_test_cifar100[:n_test]
+        y_test = y_test_cifar100[:n_test]
+    return x_train, y_train, x_test, y_test
 class ExpectedValue:
     def __init__(self, value, decimals):
         self.value = value
@@ -1162,7 +1192,8 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
         #model = ResNet(BasicBlock, [3, 4, 6, 3])
         model = ResNet(BasicBlock, [2, 2, 2, 2]) # ResNet 18
         # Add below from now on
-        #model.load_state_dict(torch.load("model2.pth.tar"))
+        model.load_state_dict(torch.load("model2.pth.tar"))
+        # Not in use:
         # import dfmenetwork
         # model = dfmenetwork.resnet_8x.ResNet34_8x(num_classes=10)
         # device = torch.device("cuda:0"  if torch.cuda.is_available() else "cpu")
