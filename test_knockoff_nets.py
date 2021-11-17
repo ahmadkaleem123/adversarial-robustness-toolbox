@@ -15,7 +15,8 @@
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import, division, print_function, \
+    unicode_literals
 
 import logging
 import unittest
@@ -38,7 +39,7 @@ from torchvision import datasets, transforms
 logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 64
-NB_EPOCHS = 100 # make 200
+NB_EPOCHS = 100  # make 200
 NB_STOLEN = 2000
 
 
@@ -54,7 +55,6 @@ class TestKnockoffNets(TestBase):
 
     def setUp(self):
         super().setUp()
-
 
     # def test_5_pytorch_classifier(self):
     #     """
@@ -113,7 +113,6 @@ class TestKnockoffNets(TestBase):
     #     #thieved_ptc = attack.extract(x=self.x_train_mnist, thieved_classifier=thieved_ptc) # mnist on mnist
     #     thieved_ptc = attack.extract(x=self.x_train_cifar10, thieved_classifier=thieved_ptc) # cifar10 to attack mnist
 
-        
     #     thieved_preds = np.argmax(thieved_ptc.predict(x=self.x_test_mnist), axis=1)
     #     acc = np.sum(victim_preds == thieved_preds) / len(victim_preds)
     #     count = 0
@@ -288,41 +287,44 @@ class TestKnockoffNets(TestBase):
         Third test with the PyTorchClassifier (With SVHN to attack MNIST)
         :return:
         """
-        self.x_train_mnist = np.reshape(self.x_train_mnist, (self.x_train_mnist.shape[0], 1, 28, 28)).astype(np.float32)
+        self.x_train_mnist = np.reshape(self.x_train_mnist, (
+            self.x_train_mnist.shape[0], 1, 28, 28)).astype(np.float32)
         self.x_test_mnist = np.reshape(self.x_test_mnist,
-                            (self.x_test_mnist.shape[0], 1, 28, 28)).astype(
+                                       (self.x_test_mnist.shape[0], 1, 28,
+                                        28)).astype(
             np.float32)
-        self.x_train_svhn = np.reshape(self.x_train_svhn, (self.x_train_svhn.shape[0], 1, 28, 28)).astype(np.float32)
+        self.x_train_svhn = np.reshape(self.x_train_svhn, (
+            self.x_train_svhn.shape[0], 1, 28, 28)).astype(np.float32)
         self.x_test_svhn = np.reshape(self.x_test_svhn,
-                            (self.x_test_svhn.shape[0], 1, 28, 28)).astype(
+                                      (self.x_test_svhn.shape[0], 1, 28,
+                                       28)).astype(
             np.float32)
-        transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.13251461,), (0.31048025,))])
-        base_dataset = torchvision.datasets.MNIST(
-            "/ssd003/home/akaleem/data/MNIST", train=True, download=False,
-            transform=transform)
-        base_datasettest = torchvision.datasets.MNIST(
-            "/ssd003/home/akaleem/data/MNIST", train=False, download=False,
-            transform=transform)
-
 
         # Build PyTorchClassifier
-        victim_ptc = get_image_classifier_pt()
-        print("Training Victim")
-        victim_ptc.fit(  # train the victim
-            x=self.x_train_mnist,
-            y=self.y_train_mnist,
-            batch_size=64,
-            nb_epochs=100,
-        )
-        print("Done Training")
+        # victim_ptc = get_image_classifier_pt()
+
+        load_init = False
+
+        if load_init:
+            victim_ptc = get_image_classifier_pt(dataset='mnist',
+                                                 load_init=True)
+        else:
+            print("Training Victim")
+            victim_ptc = get_image_classifier_pt(dataset='mnist')
+            victim_ptc.fit(  # train the victim
+                x=self.x_train_mnist,
+                y=self.y_train_mnist,
+                batch_size=64,
+                nb_epochs=100,
+            )
+            print("Done Training")
         count2 = 0
-        victim_preds = np.argmax(victim_ptc.predict(x=self.x_test_mnist), axis=1)
+        victim_preds = np.argmax(victim_ptc.predict(x=self.x_test_mnist),
+                                 axis=1)
         for i in range(len(victim_preds)):
-            if base_datasettest.targets[i] == victim_preds[i]:
+            if np.argmax(self.y_test_mnist[i]) == victim_preds[i]:
                 count2 += 1
-        print("Victim Accuracy", count2/len(victim_preds))   
+        print("Victim Accuracy", count2 / len(victim_preds))
 
         # Create thieved classifier
         thieved_ptc = get_image_classifier_pt(load_init=False)
@@ -338,30 +340,34 @@ class TestKnockoffNets(TestBase):
             verbose=True,
         )
 
-        #thieved_ptc = attack.extract(x=self.x_train_mnist, thieved_classifier=thieved_ptc) # mnist on mnist
-        thieved_ptc = attack.extract(x=self.x_train_svhn, thieved_classifier=thieved_ptc) # svhn to attack mnist
+        # thieved_ptc = attack.extract(x=self.x_train_mnist, thieved_classifier=thieved_ptc) # mnist on mnist
+        thieved_ptc = attack.extract(x=self.x_train_svhn,
+                                     thieved_classifier=thieved_ptc)  # svhn to attack mnist
 
-        
-        thieved_preds = np.argmax(thieved_ptc.predict(x=self.x_test_mnist), axis=1)
+        thieved_preds = np.argmax(thieved_ptc.predict(x=self.x_test_mnist),
+                                  axis=1)
         acc = np.sum(victim_preds == thieved_preds) / len(victim_preds)
         count = 0
-        #print("y test", self.y_test_mnist)
+        # print("y test", self.y_test_mnist)
         for i in range(len(thieved_preds)):
-            if (base_datasettest.targets[i] == thieved_preds[i]):   # can also use y_test_mnist if we use the argmax. 
+            if np.argmax(self.y_test_mnist[i]) == thieved_preds[i]:
                 count += 1
         # print("len1", len(victim_preds))
         # print("len2", len(self.x_train_mnist))
         # print("len3", len(self.x_test_mnist))
 
         print("Fidelity Accuracy", acc)
-        print("Test Accuracy", count/len(thieved_preds))
-        #self.assertGreater(acc, 0.3)
+        print("Test Accuracy", count / len(thieved_preds))
+        # self.assertGreater(acc, 0.3)
 
         # Create adaptive attack
 
-        self.x_train_mnist = np.reshape(self.x_train_mnist, (self.x_train_mnist.shape[0], 1, 28, 28)).astype(np.float32)
-        self.x_train_svhn = np.reshape(self.x_train_svhn, (self.x_train_svhn.shape[0], 1, 28, 28)).astype(np.float32)
-        self.x_test_svhn = np.reshape(self.x_test_svhn, (self.x_test_svhn.shape[0], 1, 28, 28)).astype(np.float32)
+        self.x_train_mnist = np.reshape(self.x_train_mnist, (
+            self.x_train_mnist.shape[0], 1, 28, 28)).astype(np.float32)
+        self.x_train_svhn = np.reshape(self.x_train_svhn, (
+            self.x_train_svhn.shape[0], 1, 28, 28)).astype(np.float32)
+        self.x_test_svhn = np.reshape(self.x_test_svhn, (
+            self.x_test_svhn.shape[0], 1, 28, 28)).astype(np.float32)
         # print("shape1", self.x_train_mnist.shape)
         # print("shape2", self.x_test_svhn.shape)
         # Create thieved classifier
@@ -378,30 +384,26 @@ class TestKnockoffNets(TestBase):
             reward="all",
             verbose=True,
         )
-        #thieved_ptc = attack.extract(x=self.x_train_mnist, y=self.y_train_mnist, thieved_classifier=thieved_ptc) # with mnist on mnist
-        thieved_ptc = attack.extract(x=self.x_train_svhn, y=self.y_train_svhn, thieved_classifier=thieved_ptc) # cifar 10 to attack mnist
-        #thieved_ptc = attack.extract(x=self.x_test_svhn, y=self.y_test_svhn, thieved_classifier=thieved_ptc) # doesnt work for some reason
+        # thieved_ptc = attack.extract(x=self.x_train_mnist, y=self.y_train_mnist, thieved_classifier=thieved_ptc) # with mnist on mnist
+        is_adaptive = False
 
-        thieved_preds = np.argmax(thieved_ptc.predict(x=self.x_test_mnist), axis=1) 
-        acc = np.sum(victim_preds == thieved_preds) / len(victim_preds)
-        count = 0
-        count2 = 0
-        for i in range(len(thieved_preds)):
-            if base_datasettest.targets[i] == thieved_preds[i]:
-                count += 1
+        if is_adaptive:
+            thieved_ptc = attack.extract(x=self.x_train_svhn,
+                                         y=self.y_train_svhn,
+                                         thieved_classifier=thieved_ptc)  # cifar 10 to attack mnist
+            # thieved_ptc = attack.extract(x=self.x_test_svhn, y=self.y_test_svhn, thieved_classifier=thieved_ptc) # doesnt work for some reason
 
-        print("Fidelity Accuracy", acc)
-        print("Test Accuracy", count / len(victim_preds))
-        #print("victim", count2)
+            thieved_preds = np.argmax(thieved_ptc.predict(x=self.x_test_mnist),
+                                      axis=1)
+            acc = np.sum(victim_preds == thieved_preds) / len(victim_preds)
+            count = 0
+            count2 = 0
+            for i in range(len(thieved_preds)):
+                if np.argmax(self.y_test_mnist[i]) == thieved_preds[i]:
+                    count += 1
 
-        #self.assertGreater(acc, 0.4)
-        
-
-    def test_1_classifier_type_check_fail(self):
-        backend_test_classifier_type_check_fail(KnockoffNets, [BaseEstimator, ClassifierMixin])
-
-
-
+            print("Fidelity Accuracy", acc)
+            print("Test Accuracy", count / len(victim_preds))
 
 
 if __name__ == "__main__":

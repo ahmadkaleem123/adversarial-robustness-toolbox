@@ -34,31 +34,24 @@ from art.data_generators import (
     TensorFlowDataGenerator,
     TensorFlowV2DataGenerator,
 )
-from art.defences.preprocessor import FeatureSqueezing, JpegCompression, SpatialSmoothing
+from art.defences.preprocessor import FeatureSqueezing, JpegCompression, \
+    SpatialSmoothing
 from art.estimators.classification import KerasClassifier
 from tests.utils import (
     ARTTestFixtureNotImplemented,
     get_attack_classifier_pt,
-    get_image_classifier_kr,
-    get_image_classifier_kr_functional,
-    get_image_classifier_kr_tf,
-    get_image_classifier_kr_tf_functional,
-    get_image_classifier_kr_tf_with_wildcard,
     get_image_classifier_mxnet_custom_ini,
     get_image_classifier_pt,
     get_image_classifier_pt_functional,
-    get_image_classifier_tf,
-    get_tabular_classifier_kr,
     get_tabular_classifier_pt,
-    get_tabular_classifier_scikit_list,
-    get_tabular_classifier_tf,
     load_dataset,
     master_seed,
 )
 
 logger = logging.getLogger(__name__)
 
-deep_learning_frameworks = ["keras", "tensorflow1", "tensorflow2", "tensorflow2v1", "pytorch", "kerastf", "mxnet"]
+deep_learning_frameworks = ["keras", "tensorflow1", "tensorflow2",
+                            "tensorflow2v1", "pytorch", "kerastf", "mxnet"]
 non_deep_learning_frameworks = ["scikitlearn"]
 
 art_supported_frameworks = []
@@ -85,7 +78,7 @@ def pytest_addoption(parser):
         action="store",
         default=get_default_framework(),
         help="ART tests allow you to specify which framework to use. The default framework used is `tensorflow`. "
-        "Other options available are {0}".format(art_supported_frameworks),
+             "Other options available are {0}".format(art_supported_frameworks),
     )
 
 
@@ -105,7 +98,8 @@ def image_dl_estimator_defended(framework):
             if "FeatureSqueezing" in kwargs.get("defenses"):
                 defenses.append(fs)
             if "JpegCompression" in kwargs.get("defenses"):
-                defenses.append(JpegCompression(clip_values=clip_values, apply_predict=True))
+                defenses.append(JpegCompression(clip_values=clip_values,
+                                                apply_predict=True))
             if "SpatialSmoothing" in kwargs.get("defenses"):
                 defenses.append(SpatialSmoothing())
             del kwargs["defenses"]
@@ -129,7 +123,9 @@ def image_dl_estimator_defended(framework):
             classifier.set_params(preprocessing_defences=defenses)
         else:
             raise ARTTestFixtureNotImplemented(
-                "no defended image estimator", image_dl_estimator_defended.__name__, framework, {"defenses": defenses}
+                "no defended image estimator",
+                image_dl_estimator_defended.__name__, framework,
+                {"defenses": defenses}
             )
 
         return classifier, sess
@@ -138,7 +134,8 @@ def image_dl_estimator_defended(framework):
 
 
 @pytest.fixture(scope="function")
-def image_dl_estimator_for_attack(framework, image_dl_estimator, image_dl_estimator_defended):
+def image_dl_estimator_for_attack(framework, image_dl_estimator,
+                                  image_dl_estimator_defended):
     def _image_dl_estimator_for_attack(attack, defended=False, **kwargs):
         if defended:
             potential_classifier, _ = image_dl_estimator_defended(**kwargs)
@@ -149,12 +146,15 @@ def image_dl_estimator_for_attack(framework, image_dl_estimator, image_dl_estima
         classifier_tested = [
             potential_classifier
             for potential_classifier in classifier_list
-            if all(t in type(potential_classifier).__mro__ for t in attack._estimator_requirements)
+            if all(t in type(potential_classifier).__mro__ for t in
+                   attack._estimator_requirements)
         ]
 
         if len(classifier_tested) == 0:
             raise ARTTestFixtureNotImplemented(
-                "no estimator available", image_dl_estimator_for_attack.__name__, framework, {"attack": attack}
+                "no estimator available",
+                image_dl_estimator_for_attack.__name__, framework,
+                {"attack": attack}
             )
         return classifier_tested[0]
 
@@ -168,7 +168,9 @@ def estimator_for_attack(framework):
         if framework == "pytorch":
             return get_attack_classifier_pt(**kwargs)
 
-        raise ARTTestFixtureNotImplemented("no estimator available", image_dl_estimator_for_attack.__name__, framework)
+        raise ARTTestFixtureNotImplemented("no estimator available",
+                                           image_dl_estimator_for_attack.__name__,
+                                           framework)
 
     return _get_attack_classifier_list
 
@@ -212,12 +214,14 @@ def image_iterator(framework, get_default_mnist_subset, default_batch_size):
                 fill_mode="constant",
                 cval=0,
             )
-            return keras_gen.flow(x_train_mnist, y_train_mnist, batch_size=default_batch_size)
+            return keras_gen.flow(x_train_mnist, y_train_mnist,
+                                  batch_size=default_batch_size)
 
         if framework == "tensorflow1":
             import tensorflow as tf
 
-            x_tensor = tf.convert_to_tensor(x_train_mnist.reshape(10, 100, 28, 28, 1))
+            x_tensor = tf.convert_to_tensor(
+                x_train_mnist.reshape(10, 100, 28, 28, 1))
             y_tensor = tf.convert_to_tensor(y_train_mnist.reshape(10, 100, 10))
             dataset = tf.data.Dataset.from_tensor_slices((x_tensor, y_tensor))
             return dataset.make_initializable_iterator()
@@ -225,7 +229,8 @@ def image_iterator(framework, get_default_mnist_subset, default_batch_size):
         if framework == "tensorflow2":
             import tensorflow as tf
 
-            dataset = tf.data.Dataset.from_tensor_slices((x_train_mnist, y_train_mnist)).batch(default_batch_size)
+            dataset = tf.data.Dataset.from_tensor_slices(
+                (x_train_mnist, y_train_mnist)).batch(default_batch_size)
             return dataset
 
         if framework == "pytorch":
@@ -236,12 +241,15 @@ def image_iterator(framework, get_default_mnist_subset, default_batch_size):
             x_train_tens = x_train_tens.float()
             y_train_tens = torch.from_numpy(y_train_mnist)
             dataset = torch.utils.data.TensorDataset(x_train_tens, y_train_tens)
-            return torch.utils.data.DataLoader(dataset=dataset, batch_size=default_batch_size, shuffle=True)
+            return torch.utils.data.DataLoader(dataset=dataset,
+                                               batch_size=default_batch_size,
+                                               shuffle=True)
 
         if framework == "mxnet":
             from mxnet import gluon
 
-            dataset = gluon.data.dataset.ArrayDataset(x_train_mnist, y_train_mnist)
+            dataset = gluon.data.dataset.ArrayDataset(x_train_mnist,
+                                                      y_train_mnist)
             return gluon.data.DataLoader(dataset, batch_size=5, shuffle=True)
 
         return None
@@ -250,7 +258,8 @@ def image_iterator(framework, get_default_mnist_subset, default_batch_size):
 
 
 @pytest.fixture
-def image_data_generator(framework, get_default_mnist_subset, image_iterator, default_batch_size):
+def image_data_generator(framework, get_default_mnist_subset, image_iterator,
+                         default_batch_size):
     def _image_data_generator(**kwargs):
         (x_train_mnist, y_train_mnist), (_, _) = get_default_mnist_subset
         image_it = image_iterator()
@@ -282,12 +291,14 @@ def image_data_generator(framework, get_default_mnist_subset, image_iterator, de
 
         if framework == "pytorch":
             data_generator = PyTorchDataGenerator(
-                iterator=image_it, size=x_train_mnist.shape[0], batch_size=default_batch_size
+                iterator=image_it, size=x_train_mnist.shape[0],
+                batch_size=default_batch_size
             )
 
         if framework == "mxnet":
             data_generator = MXDataGenerator(
-                iterator=image_it, size=x_train_mnist.shape[0], batch_size=default_batch_size
+                iterator=image_it, size=x_train_mnist.shape[0],
+                batch_size=default_batch_size
             )
 
         return data_generator
@@ -316,7 +327,9 @@ def store_expected_values(request):
 
         try:
             with open(
-                os.path.join(os.path.dirname(__file__), os.path.dirname(request.node.location[0]), file_name), "r"
+                    os.path.join(os.path.dirname(__file__),
+                                 os.path.dirname(request.node.location[0]),
+                                 file_name), "r"
             ) as f:
                 expected_values = json.load(f)
         except FileNotFoundError:
@@ -326,7 +339,9 @@ def store_expected_values(request):
         expected_values[test_name] = values_to_store
 
         with open(
-            os.path.join(os.path.dirname(__file__), os.path.dirname(request.node.location[0]), file_name), "w"
+                os.path.join(os.path.dirname(__file__),
+                             os.path.dirname(request.node.location[0]),
+                             file_name), "w"
         ) as f:
             json.dump(expected_values, f, indent=4)
 
@@ -349,7 +364,9 @@ def expected_values(framework, request):
 
     def _expected_values():
         with open(
-            os.path.join(os.path.dirname(__file__), os.path.dirname(request.node.location[0]), file_name), "r"
+                os.path.join(os.path.dirname(__file__),
+                             os.path.dirname(request.node.location[0]),
+                             file_name), "r"
         ) as f:
             expected_values = json.load(f)
 
@@ -361,7 +378,8 @@ def expected_values(framework, request):
                 return expected_values[request.node.name]
             else:
                 raise ARTTestFixtureNotImplemented(
-                    "Couldn't find any expected values for test {0}".format(request.node.name),
+                    "Couldn't find any expected values for test {0}".format(
+                        request.node.name),
                     expected_values.__name__,
                     framework_name,
                 )
@@ -408,7 +426,8 @@ def get_image_classifier_mx_model():
 
 
 @pytest.fixture
-def get_image_classifier_mx_instance(get_image_classifier_mx_model, mnist_shape):
+def get_image_classifier_mx_instance(get_image_classifier_mx_model,
+                                     mnist_shape):
     import mxnet  # lgtm [py/import-and-import-from]
     from art.estimators.classification import MXClassifier
 
@@ -425,7 +444,8 @@ def get_image_classifier_mx_instance(get_image_classifier_mx_model, mnist_shape)
             )
 
         loss = mxnet.gluon.loss.SoftmaxCrossEntropyLoss(from_logits=from_logits)
-        trainer = mxnet.gluon.Trainer(model.collect_params(), "sgd", {"learning_rate": 0.1})
+        trainer = mxnet.gluon.Trainer(model.collect_params(), "sgd",
+                                      {"learning_rate": 0.1})
 
         # Get classifier
         mxc = MXClassifier(
@@ -458,7 +478,8 @@ def supported_losses_types(framework):
             return ["label", "function", "class"]
 
         raise ARTTestFixtureNotImplemented(
-            "Could not find supported_losses_types", supported_losses_types.__name__, framework
+            "Could not find supported_losses_types",
+            supported_losses_types.__name__, framework
         )
 
     return supported_losses_types
@@ -468,7 +489,8 @@ def supported_losses_types(framework):
 def supported_losses_logit(framework):
     def _supported_losses_logit():
         if framework == "keras":
-            return ["categorical_crossentropy_function_backend", "sparse_categorical_crossentropy_function_backend"]
+            return ["categorical_crossentropy_function_backend",
+                    "sparse_categorical_crossentropy_function_backend"]
         if framework == "kerastf":
             # if loss_type is not "label" and loss_name not in ["categorical_hinge", "kullback_leibler_divergence"]:
             return [
@@ -478,7 +500,8 @@ def supported_losses_logit(framework):
                 "sparse_categorical_crossentropy_class",
             ]
         raise ARTTestFixtureNotImplemented(
-            "Could not find supported_losses_logit", supported_losses_logit.__name__, framework
+            "Could not find supported_losses_logit",
+            supported_losses_logit.__name__, framework
         )
 
     return _supported_losses_logit
@@ -512,7 +535,8 @@ def supported_losses_proba(framework):
             ]
 
         raise ARTTestFixtureNotImplemented(
-            "Could not find supported_losses_proba", supported_losses_proba.__name__, framework
+            "Could not find supported_losses_proba",
+            supported_losses_proba.__name__, framework
         )
 
     return _supported_losses_proba
@@ -568,7 +592,8 @@ def image_dl_estimator(framework, get_image_classifier_mx_instance):
 
         if classifier is None:
             raise ARTTestFixtureNotImplemented(
-                "no test deep learning estimator available", image_dl_estimator.__name__, framework
+                "no test deep learning estimator available",
+                image_dl_estimator.__name__, framework
             )
 
         return classifier, sess
@@ -587,8 +612,9 @@ def art_warning(request):
                         "once. However the ART test exception was thrown, hence it is never run fully. "
                     )
             elif (
-                request.node.get_closest_marker("only_with_platform")
-                and len(request.node.get_closest_marker("only_with_platform").args) == 1
+                    request.node.get_closest_marker("only_with_platform")
+                    and len(
+                request.node.get_closest_marker("only_with_platform").args) == 1
             ):
                 raise Exception(
                     "This test has marker only_with_platform decorator which means it will only be ran "
@@ -610,10 +636,14 @@ def art_warning(request):
 def decision_tree_estimator(framework):
     def _decision_tree_estimator(clipped=True):
         if framework == "scikitlearn":
-            return get_tabular_classifier_scikit_list(clipped=clipped, model_list_names=["decisionTreeClassifier"])[0]
+            return get_tabular_classifier_scikit_list(clipped=clipped,
+                                                      model_list_names=[
+                                                          "decisionTreeClassifier"])[
+                0]
 
         raise ARTTestFixtureNotImplemented(
-            "no test decision_tree_classifier available", decision_tree_estimator.__name__, framework
+            "no test decision_tree_classifier available",
+            decision_tree_estimator.__name__, framework
         )
 
     return _decision_tree_estimator
@@ -628,7 +658,9 @@ def tabular_dl_estimator(framework):
                 classifier = get_tabular_classifier_kr()
             else:
                 kr_classifier = get_tabular_classifier_kr()
-                classifier = KerasClassifier(model=kr_classifier.model, use_logits=False, channels_first=True)
+                classifier = KerasClassifier(model=kr_classifier.model,
+                                             use_logits=False,
+                                             channels_first=True)
 
         if framework == "tensorflow1" or framework == "tensorflow2":
             if clipped:
@@ -640,7 +672,8 @@ def tabular_dl_estimator(framework):
 
         if classifier is None:
             raise ARTTestFixtureNotImplemented(
-                "no deep learning tabular estimator available", tabular_dl_estimator.__name__, framework
+                "no deep learning tabular estimator available",
+                tabular_dl_estimator.__name__, framework
             )
         return classifier
 
@@ -693,7 +726,8 @@ def default_batch_size():
 @pytest.fixture(scope="session")
 def load_iris_dataset():
     logging.info("Loading Iris dataset")
-    (x_train_iris, y_train_iris), (x_test_iris, y_test_iris), _, _ = load_dataset("iris")
+    (x_train_iris, y_train_iris), (
+    x_test_iris, y_test_iris), _, _ = load_dataset("iris")
 
     yield (x_train_iris, y_train_iris), (x_test_iris, y_test_iris)
 
@@ -709,35 +743,47 @@ def get_iris_dataset(load_iris_dataset, framework):
 
     yield (x_train_iris, y_train_iris), (x_test_iris, y_test_iris)
 
-    np.testing.assert_array_almost_equal(x_train_iris_original, x_train_iris, decimal=3)
-    np.testing.assert_array_almost_equal(y_train_iris_original, y_train_iris, decimal=3)
-    np.testing.assert_array_almost_equal(x_test_iris_original, x_test_iris, decimal=3)
-    np.testing.assert_array_almost_equal(y_test_iris_original, y_test_iris, decimal=3)
+    np.testing.assert_array_almost_equal(x_train_iris_original, x_train_iris,
+                                         decimal=3)
+    np.testing.assert_array_almost_equal(y_train_iris_original, y_train_iris,
+                                         decimal=3)
+    np.testing.assert_array_almost_equal(x_test_iris_original, x_test_iris,
+                                         decimal=3)
+    np.testing.assert_array_almost_equal(y_test_iris_original, y_test_iris,
+                                         decimal=3)
 
 
 @pytest.fixture(scope="session")
 def load_diabetes_dataset():
     logging.info("Loading Diabetes dataset")
-    (x_train_diabetes, y_train_diabetes), (x_test_diabetes, y_test_diabetes), _, _ = load_dataset("diabetes")
+    (x_train_diabetes, y_train_diabetes), (
+    x_test_diabetes, y_test_diabetes), _, _ = load_dataset("diabetes")
 
-    yield (x_train_diabetes, y_train_diabetes), (x_test_diabetes, y_test_diabetes)
+    yield (x_train_diabetes, y_train_diabetes), (
+    x_test_diabetes, y_test_diabetes)
 
 
 @pytest.fixture(scope="function")
 def get_diabetes_dataset(load_diabetes_dataset, framework):
-    (x_train_diabetes, y_train_diabetes), (x_test_diabetes, y_test_diabetes) = load_diabetes_dataset
+    (x_train_diabetes, y_train_diabetes), (
+    x_test_diabetes, y_test_diabetes) = load_diabetes_dataset
 
     x_train_diabetes_original = x_train_diabetes.copy()
     y_train_diabetes_original = y_train_diabetes.copy()
     x_test_diabetes_original = x_test_diabetes.copy()
     y_test_diabetes_original = y_test_diabetes.copy()
 
-    yield (x_train_diabetes, y_train_diabetes), (x_test_diabetes, y_test_diabetes)
+    yield (x_train_diabetes, y_train_diabetes), (
+    x_test_diabetes, y_test_diabetes)
 
-    np.testing.assert_array_almost_equal(x_train_diabetes_original, x_train_diabetes, decimal=3)
-    np.testing.assert_array_almost_equal(y_train_diabetes_original, y_train_diabetes, decimal=3)
-    np.testing.assert_array_almost_equal(x_test_diabetes_original, x_test_diabetes, decimal=3)
-    np.testing.assert_array_almost_equal(y_test_diabetes_original, y_test_diabetes, decimal=3)
+    np.testing.assert_array_almost_equal(x_train_diabetes_original,
+                                         x_train_diabetes, decimal=3)
+    np.testing.assert_array_almost_equal(y_train_diabetes_original,
+                                         y_train_diabetes, decimal=3)
+    np.testing.assert_array_almost_equal(x_test_diabetes_original,
+                                         x_test_diabetes, decimal=3)
+    np.testing.assert_array_almost_equal(y_test_diabetes_original,
+                                         y_test_diabetes, decimal=3)
 
 
 @pytest.fixture(scope="session")
@@ -756,20 +802,28 @@ def mnist_shape(framework):
 
 
 @pytest.fixture()
-def get_default_mnist_subset(get_mnist_dataset, default_dataset_subset_sizes, mnist_shape):
-    (x_train_mnist, y_train_mnist), (x_test_mnist, y_test_mnist) = get_mnist_dataset
+def get_default_mnist_subset(get_mnist_dataset, default_dataset_subset_sizes,
+                             mnist_shape):
+    (x_train_mnist, y_train_mnist), (
+    x_test_mnist, y_test_mnist) = get_mnist_dataset
     n_train, n_test = default_dataset_subset_sizes
 
-    x_train_mnist = np.reshape(x_train_mnist, (x_train_mnist.shape[0],) + mnist_shape).astype(np.float32)
-    x_test_mnist = np.reshape(x_test_mnist, (x_test_mnist.shape[0],) + mnist_shape).astype(np.float32)
+    x_train_mnist = np.reshape(x_train_mnist,
+                               (x_train_mnist.shape[0],) + mnist_shape).astype(
+        np.float32)
+    x_test_mnist = np.reshape(x_test_mnist,
+                              (x_test_mnist.shape[0],) + mnist_shape).astype(
+        np.float32)
 
-    yield (x_train_mnist[:n_train], y_train_mnist[:n_train]), (x_test_mnist[:n_test], y_test_mnist[:n_test])
+    yield (x_train_mnist[:n_train], y_train_mnist[:n_train]), (
+    x_test_mnist[:n_test], y_test_mnist[:n_test])
 
 
 @pytest.fixture(scope="session")
 def load_mnist_dataset():
     logging.info("Loading mnist")
-    (x_train_mnist, y_train_mnist), (x_test_mnist, y_test_mnist), _, _ = load_dataset("mnist")
+    (x_train_mnist, y_train_mnist), (
+    x_test_mnist, y_test_mnist), _, _ = load_dataset("mnist")
     yield (x_train_mnist, y_train_mnist), (x_test_mnist, y_test_mnist)
 
 
@@ -782,10 +836,15 @@ def create_test_dir():
 
 @pytest.fixture(scope="function")
 def get_mnist_dataset(load_mnist_dataset, mnist_shape):
-    (x_train_mnist, y_train_mnist), (x_test_mnist, y_test_mnist) = load_mnist_dataset
+    (x_train_mnist, y_train_mnist), (
+    x_test_mnist, y_test_mnist) = load_mnist_dataset
 
-    x_train_mnist = np.reshape(x_train_mnist, (x_train_mnist.shape[0],) + mnist_shape).astype(np.float32)
-    x_test_mnist = np.reshape(x_test_mnist, (x_test_mnist.shape[0],) + mnist_shape).astype(np.float32)
+    x_train_mnist = np.reshape(x_train_mnist,
+                               (x_train_mnist.shape[0],) + mnist_shape).astype(
+        np.float32)
+    x_test_mnist = np.reshape(x_test_mnist,
+                              (x_test_mnist.shape[0],) + mnist_shape).astype(
+        np.float32)
 
     x_train_mnist_original = x_train_mnist.copy()
     y_train_mnist_original = y_train_mnist.copy()
@@ -795,10 +854,14 @@ def get_mnist_dataset(load_mnist_dataset, mnist_shape):
     yield (x_train_mnist, y_train_mnist), (x_test_mnist, y_test_mnist)
 
     # Check that the test data has not been modified, only catches changes in attack.generate if self has been used
-    np.testing.assert_array_almost_equal(x_train_mnist_original, x_train_mnist, decimal=3)
-    np.testing.assert_array_almost_equal(y_train_mnist_original, y_train_mnist, decimal=3)
-    np.testing.assert_array_almost_equal(x_test_mnist_original, x_test_mnist, decimal=3)
-    np.testing.assert_array_almost_equal(y_test_mnist_original, y_test_mnist, decimal=3)
+    np.testing.assert_array_almost_equal(x_train_mnist_original, x_train_mnist,
+                                         decimal=3)
+    np.testing.assert_array_almost_equal(y_train_mnist_original, y_train_mnist,
+                                         decimal=3)
+    np.testing.assert_array_almost_equal(x_test_mnist_original, x_test_mnist,
+                                         decimal=3)
+    np.testing.assert_array_almost_equal(y_test_mnist_original, y_test_mnist,
+                                         decimal=3)
 
 
 # ART test fixture to skip test for specific framework values
@@ -806,7 +869,8 @@ def get_mnist_dataset(load_mnist_dataset, mnist_shape):
 @pytest.fixture(autouse=True)
 def only_with_platform(request, framework):
     if request.node.get_closest_marker("only_with_platform"):
-        if framework not in request.node.get_closest_marker("only_with_platform").args:
+        if framework not in request.node.get_closest_marker(
+                "only_with_platform").args:
             pytest.skip("skipped on this platform: {}".format(framework))
 
 
@@ -816,7 +880,8 @@ def only_with_platform(request, framework):
 @pytest.fixture(autouse=True)
 def skip_by_framework(request, framework):
     if request.node.get_closest_marker("skip_framework"):
-        framework_to_skip_list = list(request.node.get_closest_marker("skip_framework").args)
+        framework_to_skip_list = list(
+            request.node.get_closest_marker("skip_framework").args)
         if "dl_frameworks" in framework_to_skip_list:
             framework_to_skip_list.extend(deep_learning_frameworks)
 
@@ -844,7 +909,9 @@ def make_customer_record():
 def framework_agnostic(request, framework):
     if request.node.get_closest_marker("framework_agnostic"):
         if framework != get_default_framework():
-            pytest.skip("framework agnostic test skipped for framework : {}".format(framework))
+            pytest.skip(
+                "framework agnostic test skipped for framework : {}".format(
+                    framework))
 
 
 # ART test fixture to skip test for specific required modules
@@ -866,16 +933,18 @@ def skip_by_module(request):
                 module_found = module_spec is not None
 
                 if not module_found:
-                    pytest.skip(f"Test skipped because package {module} not available.")
+                    pytest.skip(
+                        f"Test skipped because package {module} not available.")
 
 
 @pytest.fixture()
 def fix_get_rcnn():
-
     from art.estimators.estimator import BaseEstimator, LossGradientsMixin
-    from art.estimators.object_detection.object_detector import ObjectDetectorMixin
+    from art.estimators.object_detection.object_detector import \
+        ObjectDetectorMixin
 
-    class DummyObjectDetector(ObjectDetectorMixin, LossGradientsMixin, BaseEstimator):
+    class DummyObjectDetector(ObjectDetectorMixin, LossGradientsMixin,
+                              BaseEstimator):
         def __init__(self):
             self._clip_values = (0, 1)
             self.channels_first = False
@@ -884,11 +953,13 @@ def fix_get_rcnn():
         def loss_gradient(self, x: np.ndarray, y: None, **kwargs):
             return np.ones_like(x)
 
-        def fit(self, x: np.ndarray, y, batch_size: int = 128, nb_epochs: int = 20, **kwargs):
+        def fit(self, x: np.ndarray, y, batch_size: int = 128,
+                nb_epochs: int = 20, **kwargs):
             raise NotImplementedError
 
         def predict(self, x: np.ndarray, batch_size: int = 128, **kwargs):
-            dict_i = {"boxes": np.array([[0.1, 0.2, 0.3, 0.4]]), "labels": np.array([[2]]), "scores": np.array([[0.8]])}
+            dict_i = {"boxes": np.array([[0.1, 0.2, 0.3, 0.4]]),
+                      "labels": np.array([[2]]), "scores": np.array([[0.8]])}
             return [dict_i] * x.shape[0]
 
         @property

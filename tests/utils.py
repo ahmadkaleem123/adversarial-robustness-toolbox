@@ -18,7 +18,8 @@
 """
 Module providing convenience functions specifically for unit tests.
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import, division, print_function, \
+    unicode_literals
 
 import json
 import logging
@@ -38,153 +39,156 @@ from art.utils import load_dataset
 logger = logging.getLogger(__name__)
 
 # ----------------------------------------------------------------------------------------------------- TEST BASE CLASS
-art_supported_frameworks = ["keras", "tensorflow", "tensorflow2v1", "pytorch", "scikitlearn"]
+art_supported_frameworks = ["keras", "tensorflow", "tensorflow2v1", "pytorch",
+                            "scikitlearn"]
 
 
-# class TestBase(unittest.TestCase):
-#     """
-#     This class implements the base class for all unit tests.
-#     """
-#
-#     @classmethod
-#     def setUpClass(cls):
-#         master_seed(1234)
-#
-#         cls.n_train = 50000  # Increase this for better victim model
-#         cls.n_test = 1000
-#         cls.batch_size = 64
-#
-#         cls.create_image_dataset(n_train=cls.n_train, n_test=cls.n_test)
-#
-#         # (x_train_iris, y_train_iris), (x_test_iris, y_test_iris), _, _ = load_dataset("iris")
-#         #
-#         # cls.x_train_iris = x_train_iris
-#         # cls.y_train_iris = y_train_iris
-#         # cls.x_test_iris = x_test_iris
-#         # cls.y_test_iris = y_test_iris
-#         #
-#         # cls._x_train_iris_original = cls.x_train_iris.copy()
-#         # cls._y_train_iris_original = cls.y_train_iris.copy()
-#         # cls._x_test_iris_original = cls.x_test_iris.copy()
-#         # cls._y_test_iris_original = cls.y_test_iris.copy()
-#
-#         # Filter warning for scipy, removed with scipy 1.4
-#         warnings.filterwarnings("ignore", ".*the output shape of zoom.*")
-#
-#     @classmethod
-#     def create_image_dataset(cls, n_train, n_test):
-#         (x_train_mnist, y_train_mnist), (x_test_mnist, y_test_mnist), _, _ = load_dataset("mnist")
-#         # include code to randomkly shuffle this
-#         cls.x_train_mnist = x_train_mnist[:n_train]
-#         cls.y_train_mnist = y_train_mnist[:n_train]
-#         cls.x_test_mnist = x_test_mnist[:n_test]
-#         cls.y_test_mnist = y_test_mnist[:n_test]
-#
-#         # cls._x_train_mnist_original = cls.x_train_mnist.copy()
-#         # cls._y_train_mnist_original = cls.y_train_mnist.copy()
-#         # cls._x_test_mnist_original = cls.x_test_mnist.copy()
-#         # cls._y_test_mnist_original = cls.y_test_mnist.copy()
-#
-#         (x_train_cifar10, y_train_cifar10), (x_test_cifar10, y_test_cifar10), _, _ = load_dataset("cifar10")
-#         indices = np.random.choice(len(x_train_cifar10), n_train, replace=False)
-#         indices2 = np.random.choice(len(x_test_cifar10), n_test, replace=False)
-#         cls.x_train_cifar10 = x_train_cifar10[:n_train]
-#         cls.y_train_cifar10 = y_train_cifar10[:n_train]
-#         cls.x_test_cifar10 = x_test_cifar10[:n_test]
-#         cls.y_test_cifar10 = y_test_cifar10[:n_test]
-#         # cls.x_train_cifar10 = np.take(x_train_cifar10, indices, axis=0)
-#         # cls.y_train_cifar10 = np.take(y_train_cifar10, indices, axis=0)
-#         # cls.x_test_cifar10 = np.take(x_test_cifar10, indices2, axis=0)
-#         # cls.y_test_cifar10 = np.take(y_test_cifar10, indices2, axis=0)
-#
-#         # cls._x_train_cifar10_original = cls.x_train_cifar10.copy()
-#         # cls._y_train_cifar10_original = cls.y_train_cifar10.copy()
-#         # cls._x_test_cifar10_original = cls.x_test_cifar10.copy()
-#         # cls._y_test_cifar10_original = cls.y_test_cifar10.copy()
-#
-#         (x_train_cifar100, y_train_cifar100), (x_test_cifar100, y_test_cifar100), _, _ = load_dataset("cifar100")
-#         indices = np.random.choice(len(x_train_cifar100), n_train, replace=False)
-#         indices2 = np.random.choice(len(x_test_cifar100), n_test, replace=False)
-#         # cls.x_train_cifar100 = x_train_cifar100[:n_train]
-#         # cls.y_train_cifar100 = y_train_cifar100[:n_train]
-#         # cls.x_test_cifar100 = x_test_cifar100[:n_test]
-#         # cls.y_test_cifar100 = y_test_cifar100[:n_test]
-#         cls.x_train_cifar100 = np.take(x_train_cifar100, indices, axis=0)
-#         cls.y_train_cifar100 = np.take(y_train_cifar100, indices, axis=0)
-#         cls.x_test_cifar100 = np.take(x_test_cifar100, indices2, axis=0)
-#         cls.y_test_cifar100 = np.take(y_test_cifar100, indices2, axis=0)
-#
-#         # cls._x_train_cifar100_original = cls.x_train_cifar100.copy()
-#         # cls._y_train_cifar100_original = cls.y_train_cifar100.copy()
-#         # cls._x_test_cifar100_original = cls.x_test_cifar100.copy()
-#         # cls._y_test_cifar100_original = cls.y_test_cifar100.copy()
-#
-#         (x_train_svhn, y_train_svhn), (x_test_svhn, y_test_svhn), _, _ = load_dataset("svhn")
-#         cls.x_train_svhn = x_train_svhn[:n_train]
-#         cls.y_train_svhn = y_train_svhn[:n_train]
-#         cls.x_test_svhn = x_test_svhn[:n_test]
-#         cls.y_test_svhn = y_test_svhn[:n_test]
-#
-#         # cls._x_train_svhn_original = cls.x_train_svhn.copy()
-#         # cls._y_train_svhn_original = cls.y_train_svhn.copy()
-#         # cls._x_test_svhn_original = cls.x_test_svhn.copy()
-#         # cls._y_test_svhn_original = cls.y_test_svhn.copy()
-#
-#     def setUp(self):
-#         self.time_start = time.time()
-#         print("\n\n\n----------------------------------------------------------------------")
-#
-#     def tearDown(self):
-#         time_end = time.time() - self.time_start
-#         test_name = ".".join(self.id().split(" ")[0].split(".")[-2:])
-#         logger.info("%s: completed in %.3f seconds" % (test_name, time_end))
-#
-#         # Check that the test data has not been modified, only catches changes in attack.generate if self has been used
-#         # np.testing.assert_array_almost_equal(
-#         #     self._x_train_mnist_original[0 : self.n_train], self.x_train_mnist, decimal=3
-#         # )
-#         # np.testing.assert_array_almost_equal(
-#         #     self._y_train_mnist_original[0 : self.n_train], self.y_train_mnist, decimal=3
-#         # )
-#         # np.testing.assert_array_almost_equal(self._x_test_mnist_original[0 : self.n_test], self.x_test_mnist, decimal=3)
-#         # np.testing.assert_array_almost_equal(self._y_test_mnist_original[0 : self.n_test], self.y_test_mnist, decimal=3)
-#
-#         # np.testing.assert_array_almost_equal(self._x_train_iris_original, self.x_train_iris, decimal=3)
-#         # np.testing.assert_array_almost_equal(self._y_train_iris_original, self.y_train_iris, decimal=3)
-#         # np.testing.assert_array_almost_equal(self._x_test_iris_original, self.x_test_iris, decimal=3)
-#         # np.testing.assert_array_almost_equal(self._y_test_iris_original, self.y_test_iris, decimal=3)
-#
+class TestBase(unittest.TestCase):
+    """
+    This class implements the base class for all unit tests.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        master_seed(1234)
+
+        cls.n_train = 50000  # Increase this for better victim model
+        cls.n_test = 1000
+        cls.batch_size = 64
+
+        cls.create_image_dataset(n_train=cls.n_train, n_test=cls.n_test)
+
+        # (x_train_iris, y_train_iris), (x_test_iris, y_test_iris), _, _ = load_dataset("iris")
+        #
+        # cls.x_train_iris = x_train_iris
+        # cls.y_train_iris = y_train_iris
+        # cls.x_test_iris = x_test_iris
+        # cls.y_test_iris = y_test_iris
+        #
+        # cls._x_train_iris_original = cls.x_train_iris.copy()
+        # cls._y_train_iris_original = cls.y_train_iris.copy()
+        # cls._x_test_iris_original = cls.x_test_iris.copy()
+        # cls._y_test_iris_original = cls.y_test_iris.copy()
+
+        # Filter warning for scipy, removed with scipy 1.4
+        warnings.filterwarnings("ignore", ".*the output shape of zoom.*")
+
+    @classmethod
+    def create_image_dataset(cls, n_train, n_test):
+        (x_train_mnist, y_train_mnist), (x_test_mnist, y_test_mnist), _, _ = load_dataset("mnist")
+        # include code to randomkly shuffle this
+        cls.x_train_mnist = x_train_mnist[:n_train]
+        cls.y_train_mnist = y_train_mnist[:n_train]
+        cls.x_test_mnist = x_test_mnist[:n_test]
+        cls.y_test_mnist = y_test_mnist[:n_test]
+
+        # cls._x_train_mnist_original = cls.x_train_mnist.copy()
+        # cls._y_train_mnist_original = cls.y_train_mnist.copy()
+        # cls._x_test_mnist_original = cls.x_test_mnist.copy()
+        # cls._y_test_mnist_original = cls.y_test_mnist.copy()
+
+        (x_train_cifar10, y_train_cifar10), (x_test_cifar10, y_test_cifar10), _, _ = load_dataset("cifar10")
+        indices = np.random.choice(len(x_train_cifar10), n_train, replace=False)
+        indices2 = np.random.choice(len(x_test_cifar10), n_test, replace=False)
+        cls.x_train_cifar10 = x_train_cifar10[:n_train]
+        cls.y_train_cifar10 = y_train_cifar10[:n_train]
+        cls.x_test_cifar10 = x_test_cifar10[:n_test]
+        cls.y_test_cifar10 = y_test_cifar10[:n_test]
+        # cls.x_train_cifar10 = np.take(x_train_cifar10, indices, axis=0)
+        # cls.y_train_cifar10 = np.take(y_train_cifar10, indices, axis=0)
+        # cls.x_test_cifar10 = np.take(x_test_cifar10, indices2, axis=0)
+        # cls.y_test_cifar10 = np.take(y_test_cifar10, indices2, axis=0)
+
+        # cls._x_train_cifar10_original = cls.x_train_cifar10.copy()
+        # cls._y_train_cifar10_original = cls.y_train_cifar10.copy()
+        # cls._x_test_cifar10_original = cls.x_test_cifar10.copy()
+        # cls._y_test_cifar10_original = cls.y_test_cifar10.copy()
+
+        (x_train_cifar100, y_train_cifar100), (x_test_cifar100, y_test_cifar100), _, _ = load_dataset("cifar100")
+        indices = np.random.choice(len(x_train_cifar100), n_train, replace=False)
+        indices2 = np.random.choice(len(x_test_cifar100), n_test, replace=False)
+        # cls.x_train_cifar100 = x_train_cifar100[:n_train]
+        # cls.y_train_cifar100 = y_train_cifar100[:n_train]
+        # cls.x_test_cifar100 = x_test_cifar100[:n_test]
+        # cls.y_test_cifar100 = y_test_cifar100[:n_test]
+        cls.x_train_cifar100 = np.take(x_train_cifar100, indices, axis=0)
+        cls.y_train_cifar100 = np.take(y_train_cifar100, indices, axis=0)
+        cls.x_test_cifar100 = np.take(x_test_cifar100, indices2, axis=0)
+        cls.y_test_cifar100 = np.take(y_test_cifar100, indices2, axis=0)
+
+        # cls._x_train_cifar100_original = cls.x_train_cifar100.copy()
+        # cls._y_train_cifar100_original = cls.y_train_cifar100.copy()
+        # cls._x_test_cifar100_original = cls.x_test_cifar100.copy()
+        # cls._y_test_cifar100_original = cls.y_test_cifar100.copy()
+
+        (x_train_svhn, y_train_svhn), (x_test_svhn, y_test_svhn), _, _ = load_dataset("svhn")
+        cls.x_train_svhn = x_train_svhn[:n_train]
+        cls.y_train_svhn = y_train_svhn[:n_train]
+        cls.x_test_svhn = x_test_svhn[:n_test]
+        cls.y_test_svhn = y_test_svhn[:n_test]
+
+        # cls._x_train_svhn_original = cls.x_train_svhn.copy()
+        # cls._y_train_svhn_original = cls.y_train_svhn.copy()
+        # cls._x_test_svhn_original = cls.x_test_svhn.copy()
+        # cls._y_test_svhn_original = cls.y_test_svhn.copy()
+
+    def setUp(self):
+        self.time_start = time.time()
+        print("\n\n\n----------------------------------------------------------------------")
+
+    def tearDown(self):
+        time_end = time.time() - self.time_start
+        test_name = ".".join(self.id().split(" ")[0].split(".")[-2:])
+        logger.info("%s: completed in %.3f seconds" % (test_name, time_end))
+
+        # Check that the test data has not been modified, only catches changes in attack.generate if self has been used
+        # np.testing.assert_array_almost_equal(
+        #     self._x_train_mnist_original[0 : self.n_train], self.x_train_mnist, decimal=3
+        # )
+        # np.testing.assert_array_almost_equal(
+        #     self._y_train_mnist_original[0 : self.n_train], self.y_train_mnist, decimal=3
+        # )
+        # np.testing.assert_array_almost_equal(self._x_test_mnist_original[0 : self.n_test], self.x_test_mnist, decimal=3)
+        # np.testing.assert_array_almost_equal(self._y_test_mnist_original[0 : self.n_test], self.y_test_mnist, decimal=3)
+
+        # np.testing.assert_array_almost_equal(self._x_train_iris_original, self.x_train_iris, decimal=3)
+        # np.testing.assert_array_almost_equal(self._y_train_iris_original, self.y_train_iris, decimal=3)
+        # np.testing.assert_array_almost_equal(self._x_test_iris_original, self.x_test_iris, decimal=3)
+        # np.testing.assert_array_almost_equal(self._y_test_iris_original, self.y_test_iris, decimal=3)
+
 
 def create_image_dataset(n_train, n_test, dataset):
     if dataset == "mnist":
         (x_train_mnist, y_train_mnist), (
-        x_test_mnist, y_test_mnist), _, _ = load_dataset("mnist")
+            x_test_mnist, y_test_mnist), _, _ = load_dataset("mnist")
         x_train = x_train_mnist[:n_train]
         y_train = y_train_mnist[:n_train]
         x_test = x_test_mnist[:n_test]
         y_test = y_test_mnist[:n_test]
     elif dataset == "svhn":
         (x_train_svhn, y_train_svhn), (
-        x_test_svhn, y_test_svhn), _, _ = load_dataset("svhn")
+            x_test_svhn, y_test_svhn), _, _ = load_dataset("svhn")
         x_train = x_train_svhn[:n_train]
         y_train = y_train_svhn[:n_train]
         x_test = x_test_svhn[:n_test]
         y_test = y_test_svhn[:n_test]
     elif dataset == "cifar10":
         (x_train_cifar10, y_train_cifar10), (
-        x_test_cifar10, y_test_cifar10), _, _ = load_dataset("cifar10")
+            x_test_cifar10, y_test_cifar10), _, _ = load_dataset("cifar10")
         x_train = x_train_cifar10[:n_train]
         y_train = y_train_cifar10[:n_train]
         x_test = x_test_cifar10[:n_test]
         y_test = y_test_cifar10[:n_test]
     elif dataset == "cifar100":
         (x_train_cifar100, y_train_cifar100), (
-        x_test_cifar100, y_test_cifar100), _, _ = load_dataset("cifar100")
+            x_test_cifar100, y_test_cifar100), _, _ = load_dataset("cifar100")
         x_train = x_train_cifar100[:n_train]
         y_train = y_train_cifar100[:n_train]
         x_test = x_test_cifar100[:n_test]
         y_test = y_test_cifar100[:n_test]
     return x_train, y_train, x_test, y_test
+
+
 class ExpectedValue:
     def __init__(self, value, decimals):
         self.value = value
@@ -204,18 +208,28 @@ def check_adverse_example_x(x_adv, x_original, max=1.0, min=0.0, bounded=True):
     :param bounded:
     :return:
     """
-    assert bool((x_original == x_adv).all()) is False, "x_test_adv should have been different from x_test"
+    assert bool((
+                            x_original == x_adv).all()) is False, "x_test_adv should have been different from x_test"
 
     if bounded:
-        assert np.amax(x_adv) <= max, "x_test_adv values should have all been below {0}".format(max)
-        assert np.amin(x_adv) >= min, "x_test_adv values should have all been above {0}".format(min)
+        assert np.amax(
+            x_adv) <= max, "x_test_adv values should have all been below {0}".format(
+            max)
+        assert np.amin(
+            x_adv) >= min, "x_test_adv values should have all been above {0}".format(
+            min)
     else:
-        assert (x_adv > max).any(), "some x_test_adv values should have been above {0}".format(max)
-        assert (x_adv < min).any(), " some x_test_adv values should have all been below {0}".format(min)
+        assert (
+                    x_adv > max).any(), "some x_test_adv values should have been above {0}".format(
+            max)
+        assert (
+                    x_adv < min).any(), " some x_test_adv values should have all been below {0}".format(
+            min)
 
 
 def check_adverse_predicted_sample_y(y_pred_adv, y_non_adv):
-    assert bool((y_non_adv == y_pred_adv).all()) is False, "Adverse predicted sample was not what was expected"
+    assert bool((
+                            y_non_adv == y_pred_adv).all()) is False, "Adverse predicted sample was not what was expected"
 
 
 def is_valid_framework(framework):
@@ -1012,7 +1026,7 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
     from art.estimators.classification.pytorch import PyTorchClassifier
 
     if dataset == None or dataset == "mnist":
-    ### MNISTNet Architecture
+        ### MNISTNet Architecture
         class Model(torch.nn.Module):
             """Class used to initialize model of student/teacher"""
 
@@ -1039,18 +1053,21 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
 
             def __init__(self, in_planes, planes, stride=1):
                 super(BasicBlock, self).__init__()
-                self.conv1 = torch.nn.Conv2d(in_planes, planes, kernel_size=3, stride=stride,
-                                    padding=1, bias=False)
+                self.conv1 = torch.nn.Conv2d(in_planes, planes, kernel_size=3,
+                                             stride=stride,
+                                             padding=1, bias=False)
                 self.bn1 = torch.nn.BatchNorm2d(planes)
-                self.conv2 = torch.nn.Conv2d(planes, planes, kernel_size=3, stride=1,
-                                    padding=1, bias=False)
+                self.conv2 = torch.nn.Conv2d(planes, planes, kernel_size=3,
+                                             stride=1,
+                                             padding=1, bias=False)
                 self.bn2 = torch.nn.BatchNorm2d(planes)
 
                 self.shortcut = torch.nn.Sequential()
                 if stride != 1 or in_planes != self.expansion * planes:
                     self.shortcut = torch.nn.Sequential(
-                        torch.nn.Conv2d(in_planes, self.expansion * planes, kernel_size=1,
-                                stride=stride, bias=False),
+                        torch.nn.Conv2d(in_planes, self.expansion * planes,
+                                        kernel_size=1,
+                                        stride=stride, bias=False),
                         torch.nn.BatchNorm2d(self.expansion * planes)
                     )
 
@@ -1061,26 +1078,29 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
                 out = F.relu(out)
                 return out
 
-
         class Bottleneck(torch.nn.Module):
             expansion = 4
 
             def __init__(self, in_planes, planes, stride=1):
                 super(Bottleneck, self).__init__()
-                self.conv1 = torch.nn.Conv2d(in_planes, planes, kernel_size=1, bias=False)
+                self.conv1 = torch.nn.Conv2d(in_planes, planes, kernel_size=1,
+                                             bias=False)
                 self.bn1 = torch.nn.BatchNorm2d(planes)
-                self.conv2 = torch.nn.Conv2d(planes, planes, kernel_size=3, stride=stride,
-                                    padding=1, bias=False)
+                self.conv2 = torch.nn.Conv2d(planes, planes, kernel_size=3,
+                                             stride=stride,
+                                             padding=1, bias=False)
                 self.bn2 = torch.nn.BatchNorm2d(planes)
-                self.conv3 = torch.nn.Conv2d(planes, self.expansion * planes, kernel_size=1,
-                                    bias=False)
+                self.conv3 = torch.nn.Conv2d(planes, self.expansion * planes,
+                                             kernel_size=1,
+                                             bias=False)
                 self.bn3 = torch.nn.BatchNorm2d(self.expansion * planes)
 
                 self.shortcut = torch.nn.Sequential()
                 if stride != 1 or in_planes != self.expansion * planes:
                     self.shortcut = torch.nn.Sequential(
-                        torch.nn.Conv2d(in_planes, self.expansion * planes, kernel_size=1,
-                                stride=stride, bias=False),
+                        torch.nn.Conv2d(in_planes, self.expansion * planes,
+                                        kernel_size=1,
+                                        stride=stride, bias=False),
                         torch.nn.BatchNorm2d(self.expansion * planes)
                     )
 
@@ -1091,20 +1111,27 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
                 out += self.shortcut(x)
                 out = F.relu(out)
                 return out
+
         class ResNet(torch.nn.Module):
             def __init__(self, block, num_blocks, num_classes=10, name=''):
                 super(ResNet, self).__init__()
                 self.in_planes = 64
                 self.name = name
                 self.num_classes = num_classes
-                self.conv1 = torch.nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1,
-                                    bias=False)
+                self.conv1 = torch.nn.Conv2d(3, 64, kernel_size=3, stride=1,
+                                             padding=1,
+                                             bias=False)
                 self.bn1 = torch.nn.BatchNorm2d(64)
-                self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=1)
-                self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
-                self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
-                self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
-                self.linear = torch.nn.Linear(512 * block.expansion, num_classes)
+                self.layer1 = self._make_layer(block, 64, num_blocks[0],
+                                               stride=1)
+                self.layer2 = self._make_layer(block, 128, num_blocks[1],
+                                               stride=2)
+                self.layer3 = self._make_layer(block, 256, num_blocks[2],
+                                               stride=2)
+                self.layer4 = self._make_layer(block, 512, num_blocks[3],
+                                               stride=2)
+                self.linear = torch.nn.Linear(512 * block.expansion,
+                                              num_classes)
 
             def _make_layer(self, block, planes, num_blocks, stride):
                 strides = [stride] + [1] * (num_blocks - 1)
@@ -1188,32 +1215,28 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
     # Define the network
     if dataset == None or dataset == "mnist":
         model = Model()
-    elif dataset == "cifar10" and load_init:
-        #model = ResNet(BasicBlock, [3, 4, 6, 3])
-        model = ResNet(BasicBlock, [2, 2, 2, 2]) # ResNet 18
-        # Add below from now on
-        model.load_state_dict(torch.load("model2.pth.tar"))
-        # Not in use:
-        # import dfmenetwork
-        # model = dfmenetwork.resnet_8x.ResNet34_8x(num_classes=10)
-        # device = torch.device("cuda:0"  if torch.cuda.is_available() else "cpu")
-        # model.load_state_dict(torch.load('/ssd003/home/akaleem/capc-learning-main/dfmodels/teacher/cifar10-resnet34_8x.pt', map_location=device))
-        # model.eval()
+        lr = 0.001
+        if load_init:
+            model.load_state_dict(torch.load("model-mnist.pth.tar"))
     elif dataset == "cifar10":
-        model = ResNet(BasicBlock, [2, 2, 2, 2])
+        model = ResNet(BasicBlock, [2, 2, 2, 2])  # ResNet 18
+        lr = 0.0001
+        if load_init:
+            model.load_state_dict(torch.load("model-cifar10.pth.tar"))
 
     # Define a loss function and optimizer
-    loss_fn = torch.nn.CrossEntropyLoss(reduction="mean") # sum
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
-    optimizer2 = torch.optim.SGD(model.parameters(), lr=0.001, momentum = 0.9)
+    loss_fn = torch.nn.CrossEntropyLoss(reduction="mean")  # sum
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     # Get classifier
     if dataset == "mnist" or dataset == None:
         ptc = PyTorchClassifier(
-            model=model, loss=loss_fn, optimizer=optimizer, input_shape=(1, 28, 28), nb_classes=10, clip_values=(0, 1)
+            model=model, loss=loss_fn, optimizer=optimizer,
+            input_shape=(1, 28, 28), nb_classes=10, clip_values=(0, 1)
         )
     elif dataset == "cifar10":
         ptc = PyTorchClassifier(
-            model=model, loss=loss_fn, optimizer=optimizer, input_shape=(3, 32, 32), nb_classes=10, clip_values=(0, 1)
+            model=model, loss=loss_fn, optimizer=optimizer,
+            input_shape=(3, 32, 32), nb_classes=10, clip_values=(0, 1)
         )
     return ptc
 
@@ -1264,12 +1287,14 @@ def get_classifier_bb(defences=None):
     # define black-box classifier
     def predict(x):
         with open(
-            os.path.join(os.path.dirname(os.path.dirname(__file__)), "utils/data/mnist", "api_output.txt")
+                os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                             "utils/data/mnist", "api_output.txt")
         ) as json_file:
             predictions = json.load(json_file)
         return to_categorical(predictions["values"][: len(x)], nb_classes=10)
 
-    bbc = BlackBoxClassifier(predict, (28, 28, 1), 10, clip_values=(0, 255), preprocessing_defences=defences)
+    bbc = BlackBoxClassifier(predict, (28, 28, 1), 10, clip_values=(0, 255),
+                             preprocessing_defences=defences)
     return bbc
 
 
@@ -1279,19 +1304,22 @@ def get_classifier_bb_nn(defences=None):
 
     :return: BlackBoxClassifierNeuralNetwork
     """
-    from art.estimators.classification.blackbox import BlackBoxClassifierNeuralNetwork
+    from art.estimators.classification.blackbox import \
+        BlackBoxClassifierNeuralNetwork
     from art.utils import to_categorical
 
     # define black-box classifier
     def predict(x):
         with open(
-            os.path.join(os.path.dirname(os.path.dirname(__file__)), "utils/data/mnist", "api_output.txt")
+                os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                             "utils/data/mnist", "api_output.txt")
         ) as json_file:
             predictions = json.load(json_file)
         return to_categorical(predictions["values"][: len(x)], nb_classes=10)
 
     bbc = BlackBoxClassifierNeuralNetwork(
-        predict, (28, 28, 1), 10, clip_values=(0, 255), preprocessing_defences=defences
+        predict, (28, 28, 1), 10, clip_values=(0, 255),
+        preprocessing_defences=defences
     )
     return bbc
 
@@ -1300,21 +1328,26 @@ def get_image_classifier_mxnet_custom_ini():
     import mxnet
 
     w_conv2d = np.load(
-        os.path.join(os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "W_CONV2D_MNIST.npy")
+        os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                     "utils/resources/models", "W_CONV2D_MNIST.npy")
     )
     b_conv2d = np.load(
-        os.path.join(os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "B_CONV2D_MNIST.npy")
+        os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                     "utils/resources/models", "B_CONV2D_MNIST.npy")
     )
     w_dense = np.load(
-        os.path.join(os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "W_DENSE_MNIST.npy")
+        os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                     "utils/resources/models", "W_DENSE_MNIST.npy")
     )
     b_dense = np.load(
-        os.path.join(os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "B_DENSE_MNIST.npy")
+        os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                     "utils/resources/models", "B_DENSE_MNIST.npy")
     )
 
     w_conv2d_mx = w_conv2d.reshape((1, 1, 7, 7))
 
-    alias = mxnet.registry.get_alias_func(mxnet.initializer.Initializer, "initializer")
+    alias = mxnet.registry.get_alias_func(mxnet.initializer.Initializer,
+                                          "initializer")
 
     @mxnet.init.register
     @alias("mm_init")
@@ -1723,7 +1756,10 @@ class ARTTestFixtureNotImplemented(ARTTestException):
     def __init__(self, message, fixture_name, framework, parameters_dict=""):
         super().__init__(
             "Could NOT run test for framework: {0} due to fixture: {1}. Message was: '"
-            "{2}' for the following parameters: {3}".format(framework, fixture_name, message, parameters_dict)
+            "{2}' for the following parameters: {3}".format(framework,
+                                                            fixture_name,
+                                                            message,
+                                                            parameters_dict)
         )
 
 
@@ -1755,41 +1791,53 @@ def get_tabular_classifier_pt(load_init=True):
         if load_init:
             w_dense1 = np.load(
                 os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "W_DENSE1_IRIS.npy"
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "utils/resources/models", "W_DENSE1_IRIS.npy"
                 )
             )
             b_dense1 = np.load(
                 os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "B_DENSE1_IRIS.npy"
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "utils/resources/models", "B_DENSE1_IRIS.npy"
                 )
             )
             w_dense2 = np.load(
                 os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "W_DENSE2_IRIS.npy"
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "utils/resources/models", "W_DENSE2_IRIS.npy"
                 )
             )
             b_dense2 = np.load(
                 os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "B_DENSE2_IRIS.npy"
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "utils/resources/models", "B_DENSE2_IRIS.npy"
                 )
             )
             w_dense3 = np.load(
                 os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "W_DENSE3_IRIS.npy"
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "utils/resources/models", "W_DENSE3_IRIS.npy"
                 )
             )
             b_dense3 = np.load(
                 os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "B_DENSE3_IRIS.npy"
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "utils/resources/models", "B_DENSE3_IRIS.npy"
                 )
             )
 
-            self.fully_connected1.weight = torch.nn.Parameter(torch.Tensor(np.transpose(w_dense1)))
-            self.fully_connected1.bias = torch.nn.Parameter(torch.Tensor(b_dense1))
-            self.fully_connected2.weight = torch.nn.Parameter(torch.Tensor(np.transpose(w_dense2)))
-            self.fully_connected2.bias = torch.nn.Parameter(torch.Tensor(b_dense2))
-            self.fully_connected3.weight = torch.nn.Parameter(torch.Tensor(np.transpose(w_dense3)))
-            self.fully_connected3.bias = torch.nn.Parameter(torch.Tensor(b_dense3))
+            self.fully_connected1.weight = torch.nn.Parameter(
+                torch.Tensor(np.transpose(w_dense1)))
+            self.fully_connected1.bias = torch.nn.Parameter(
+                torch.Tensor(b_dense1))
+            self.fully_connected2.weight = torch.nn.Parameter(
+                torch.Tensor(np.transpose(w_dense2)))
+            self.fully_connected2.bias = torch.nn.Parameter(
+                torch.Tensor(b_dense2))
+            self.fully_connected3.weight = torch.nn.Parameter(
+                torch.Tensor(np.transpose(w_dense3)))
+            self.fully_connected3.bias = torch.nn.Parameter(
+                torch.Tensor(b_dense3))
 
     # pylint: disable=W0221
     # disable pylint because of API requirements for function
@@ -1851,7 +1899,8 @@ def get_attack_classifier_pt(num_features):
     loss_fn = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.0001)
     attack_model = PyTorchClassifier(
-        model=model, loss=loss_fn, optimizer=optimizer, input_shape=(num_features,), nb_classes=2
+        model=model, loss=loss_fn, optimizer=optimizer,
+        input_shape=(num_features,), nb_classes=2
     )
 
     return attack_model
@@ -1860,7 +1909,8 @@ def get_attack_classifier_pt(num_features):
 # -------------------------------------------------------------------------------------------- RANDOM NUMBER GENERATORS
 
 
-def master_seed(seed=1234, set_random=True, set_numpy=True, set_tensorflow=False, set_mxnet=False, set_torch=False):
+def master_seed(seed=1234, set_random=True, set_numpy=True,
+                set_tensorflow=False, set_mxnet=False, set_torch=False):
     """
     Set the seed for all random number generators used in the library. This ensures experiments reproducibility and
     stable testing.
@@ -1881,7 +1931,8 @@ def master_seed(seed=1234, set_random=True, set_numpy=True, set_tensorflow=False
     import numbers
 
     if not isinstance(seed, numbers.Integral):
-        raise TypeError("The seed for random number generators has to be an integer.")
+        raise TypeError(
+            "The seed for random number generators has to be an integer.")
 
     # Set Python seed
     if set_random:

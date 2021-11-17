@@ -83,7 +83,7 @@ class KnockoffNetsAttackRun:
                     0.26158784)
             )])
         base_datasettest = torchvision.datasets.CIFAR10(
-            "/ssd003/home/akaleem/data/CIFAR10", train=False, download=False,
+            "/home/nicolas/data/CIFAR10", train=False, download=False,
             transform=transform)
 
         # Build PyTorchClassifier

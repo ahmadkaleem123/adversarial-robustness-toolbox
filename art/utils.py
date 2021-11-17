@@ -19,7 +19,8 @@
 Module providing convenience functions.
 """
 # pylint: disable=C0302
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import, division, print_function, \
+    unicode_literals
 
 import logging
 import math
@@ -45,6 +46,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+import getpass
 
 # ------------------------------------------------------------------------------------------------- CONSTANTS AND TYPES
 
@@ -52,7 +54,8 @@ logger = logging.getLogger(__name__)
 DATASET_TYPE = Tuple[  # pylint: disable=C0103
     Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray], float, float
 ]
-CLIP_VALUES_TYPE = Tuple[Union[int, float, np.ndarray], Union[int, float, np.ndarray]]  # pylint: disable=C0103
+CLIP_VALUES_TYPE = Tuple[Union[int, float, np.ndarray], Union[
+    int, float, np.ndarray]]  # pylint: disable=C0103
 
 if TYPE_CHECKING:
     # pylint: disable=R0401,C0412
@@ -60,7 +63,8 @@ if TYPE_CHECKING:
 
     PREPROCESSING_TYPE = Optional[  # pylint: disable=C0103
         Union[
-            Tuple[Union[int, float, np.ndarray], Union[int, float, np.ndarray]], Preprocessor, Tuple[Preprocessor, ...]
+            Tuple[Union[int, float, np.ndarray], Union[
+                int, float, np.ndarray]], Preprocessor, Tuple[Preprocessor, ...]
         ]
     ]
 
@@ -73,14 +77,16 @@ if TYPE_CHECKING:
         ClassifierLossGradients,
         ClassifierNeuralNetwork,
     )
-    from art.estimators.classification.detector_classifier import DetectorClassifier
+    from art.estimators.classification.detector_classifier import \
+        DetectorClassifier
     from art.estimators.classification.ensemble import EnsembleClassifier
     from art.estimators.classification.GPy import GPyGaussianProcessClassifier
     from art.estimators.classification.keras import KerasClassifier
     from art.estimators.classification.lightgbm import LightGBMClassifier
     from art.estimators.classification.mxnet import MXClassifier
     from art.estimators.classification.pytorch import PyTorchClassifier
-    from art.estimators.classification.query_efficient_bb import QueryEfficientGradientEstimationClassifier
+    from art.estimators.classification.query_efficient_bb import \
+        QueryEfficientGradientEstimationClassifier
     from art.estimators.classification.scikitlearn import (
         ScikitlearnAdaBoostClassifier,
         ScikitlearnBaggingClassifier,
@@ -94,16 +100,22 @@ if TYPE_CHECKING:
         ScikitlearnRandomForestClassifier,
         ScikitlearnSVC,
     )
-    from art.estimators.classification.tensorflow import TensorFlowClassifier, TensorFlowV2Classifier
+    from art.estimators.classification.tensorflow import TensorFlowClassifier, \
+        TensorFlowV2Classifier
     from art.estimators.classification.xgboost import XGBoostClassifier
     from art.estimators.object_detection.object_detector import ObjectDetector
-    from art.estimators.object_detection.python_object_detector import PyTorchObjectDetector
-    from art.estimators.object_detection.pytorch_faster_rcnn import PyTorchFasterRCNN
-    from art.estimators.object_detection.tensorflow_faster_rcnn import TensorFlowFasterRCNN
+    from art.estimators.object_detection.python_object_detector import \
+        PyTorchObjectDetector
+    from art.estimators.object_detection.pytorch_faster_rcnn import \
+        PyTorchFasterRCNN
+    from art.estimators.object_detection.tensorflow_faster_rcnn import \
+        TensorFlowFasterRCNN
     from art.estimators.pytorch import PyTorchEstimator
     from art.estimators.regression.scikitlearn import ScikitlearnRegressor
-    from art.estimators.speech_recognition.pytorch_deep_speech import PyTorchDeepSpeech
-    from art.estimators.speech_recognition.tensorflow_lingvo import TensorFlowLingvoASR
+    from art.estimators.speech_recognition.pytorch_deep_speech import \
+        PyTorchDeepSpeech
+    from art.estimators.speech_recognition.tensorflow_lingvo import \
+        TensorFlowLingvoASR
     from art.estimators.tensorflow import TensorFlowV2Estimator
 
     CLASSIFIER_LOSS_GRADIENTS_TYPE = Union[  # pylint: disable=C0103
@@ -181,7 +193,8 @@ if TYPE_CHECKING:
         CLASSIFIER_NEURALNETWORK_TYPE,
     ]
 
-    REGRESSOR_TYPE = Union[ScikitlearnRegressor, ScikitlearnDecisionTreeRegressor]  # pylint: disable=C0103
+    REGRESSOR_TYPE = Union[
+        ScikitlearnRegressor, ScikitlearnDecisionTreeRegressor]  # pylint: disable=C0103
 
     PYTORCH_ESTIMATOR_TYPE = Union[  # pylint: disable=C0103
         PyTorchClassifier,
@@ -208,6 +221,7 @@ if TYPE_CHECKING:
         TensorFlowV2Estimator,
     ]
 
+
 # --------------------------------------------------------------------------------------------------------- DEPRECATION
 
 
@@ -227,7 +241,8 @@ class _Deprecated:
 Deprecated = _Deprecated()
 
 
-def deprecated(end_version: str, *, reason: str = "", replaced_by: str = "") -> Callable:
+def deprecated(end_version: str, *, reason: str = "",
+               replaced_by: str = "") -> Callable:
     """
     Deprecate a function or method and raise a `DeprecationWarning`.
 
@@ -269,7 +284,8 @@ def deprecated(end_version: str, *, reason: str = "", replaced_by: str = "") -> 
     return decorator
 
 
-def deprecated_keyword_arg(identifier: str, end_version: str, *, reason: str = "", replaced_by: str = "") -> Callable:
+def deprecated_keyword_arg(identifier: str, end_version: str, *,
+                           reason: str = "", replaced_by: str = "") -> Callable:
     """
     Deprecate a keyword argument and raise a `DeprecationWarning`.
 
@@ -308,14 +324,18 @@ def deprecated_keyword_arg(identifier: str, end_version: str, *, reason: str = "
             params = signature(function).bind(*args, **kwargs)
             params.apply_defaults()
 
-            if params.signature.parameters[identifier].default is not Deprecated:
-                raise ValueError("Deprecated keyword argument must default to the Decorator singleton.")
+            if params.signature.parameters[
+                identifier].default is not Deprecated:
+                raise ValueError(
+                    "Deprecated keyword argument must default to the Decorator singleton.")
             if replaced_by != "" and replaced_by not in params.arguments:
-                raise ValueError("Deprecated keyword replacement not found in function signature.")
+                raise ValueError(
+                    "Deprecated keyword replacement not found in function signature.")
 
             if params.arguments[identifier] is not Deprecated:
                 warnings.simplefilter("always", category=DeprecationWarning)
-                warnings.warn(deprecated_msg + replaced_msg + reason_msg, category=DeprecationWarning, stacklevel=2)
+                warnings.warn(deprecated_msg + replaced_msg + reason_msg,
+                              category=DeprecationWarning, stacklevel=2)
                 warnings.simplefilter("default", category=DeprecationWarning)
             return function(*args, **kwargs)
 
@@ -327,7 +347,8 @@ def deprecated_keyword_arg(identifier: str, end_version: str, *, reason: str = "
 # ----------------------------------------------------------------------------------------------------- MATH OPERATIONS
 
 
-def projection(values: np.ndarray, eps: Union[int, float, np.ndarray], norm_p: Union[int, float, str]) -> np.ndarray:
+def projection(values: np.ndarray, eps: Union[int, float, np.ndarray],
+               norm_p: Union[int, float, str]) -> np.ndarray:
     """
     Project `values` on the L_p norm ball of size `eps`.
 
@@ -342,18 +363,22 @@ def projection(values: np.ndarray, eps: Union[int, float, np.ndarray], norm_p: U
 
     if norm_p == 2:
         if isinstance(eps, np.ndarray):
-            raise NotImplementedError("The parameter `eps` of type `np.ndarray` is not supported to use with norm 2.")
+            raise NotImplementedError(
+                "The parameter `eps` of type `np.ndarray` is not supported to use with norm 2.")
 
         values_tmp = values_tmp * np.expand_dims(
-            np.minimum(1.0, eps / (np.linalg.norm(values_tmp, axis=1) + tol)), axis=1
+            np.minimum(1.0, eps / (np.linalg.norm(values_tmp, axis=1) + tol)),
+            axis=1
         )
 
     elif norm_p == 1:
         if isinstance(eps, np.ndarray):
-            raise NotImplementedError("The parameter `eps` of type `np.ndarray` is not supported to use with norm 1.")
+            raise NotImplementedError(
+                "The parameter `eps` of type `np.ndarray` is not supported to use with norm 1.")
 
         values_tmp = values_tmp * np.expand_dims(
-            np.minimum(1.0, eps / (np.linalg.norm(values_tmp, axis=1, ord=1) + tol)),
+            np.minimum(1.0,
+                       eps / (np.linalg.norm(values_tmp, axis=1, ord=1) + tol)),
             axis=1,
         )
 
@@ -375,10 +400,10 @@ def projection(values: np.ndarray, eps: Union[int, float, np.ndarray], norm_p: U
 
 
 def random_sphere(
-    nb_points: int,
-    nb_dims: int,
-    radius: Union[int, float, np.ndarray],
-    norm: Union[int, float, str],
+        nb_points: int,
+        nb_dims: int,
+        radius: Union[int, float, np.ndarray],
+        norm: Union[int, float, str],
 ) -> np.ndarray:
     """
     Generate randomly `m x n`-dimension points with radius `radius` and centered around 0.
@@ -399,9 +424,11 @@ def random_sphere(
         a_tmp[:, -1] = np.sqrt(np.random.uniform(0, radius ** 2, nb_points))
 
         for i in range(nb_points):
-            a_tmp[i, 1:-1] = np.sort(np.random.uniform(0, a_tmp[i, -1], nb_dims - 1))
+            a_tmp[i, 1:-1] = np.sort(
+                np.random.uniform(0, a_tmp[i, -1], nb_dims - 1))
 
-        res = (a_tmp[:, 1:] - a_tmp[:, :-1]) * np.random.choice([-1, 1], (nb_points, nb_dims))
+        res = (a_tmp[:, 1:] - a_tmp[:, :-1]) * np.random.choice([-1, 1], (
+            nb_points, nb_dims))
 
     elif norm == 2:
         if isinstance(radius, np.ndarray):
@@ -411,7 +438,8 @@ def random_sphere(
 
         a_tmp = np.random.randn(nb_points, nb_dims)
         s_2 = np.sum(a_tmp ** 2, axis=1)
-        base = gammainc(nb_dims / 2.0, s_2 / 2.0) ** (1 / nb_dims) * radius / np.sqrt(s_2)
+        base = gammainc(nb_dims / 2.0, s_2 / 2.0) ** (
+                1 / nb_dims) * radius / np.sqrt(s_2)
         res = a_tmp * (np.tile(base, (nb_dims, 1))).T
 
     elif norm in [np.inf, "inf"]:
@@ -427,10 +455,10 @@ def random_sphere(
 
 
 def original_to_tanh(
-    x_original: np.ndarray,
-    clip_min: Union[float, np.ndarray],
-    clip_max: Union[float, np.ndarray],
-    tanh_smoother: float = 0.999999,
+        x_original: np.ndarray,
+        clip_min: Union[float, np.ndarray],
+        clip_max: Union[float, np.ndarray],
+        tanh_smoother: float = 0.999999,
 ) -> np.ndarray:
     """
     Transform input from original to tanh space.
@@ -448,9 +476,9 @@ def original_to_tanh(
 
 
 def tanh_to_original(
-    x_tanh: np.ndarray,
-    clip_min: Union[float, np.ndarray],
-    clip_max: Union[float, np.ndarray],
+        x_tanh: np.ndarray,
+        clip_min: Union[float, np.ndarray],
+        clip_max: Union[float, np.ndarray],
 ) -> np.ndarray:
     """
     Transform input from tanh to original space.
@@ -466,7 +494,8 @@ def tanh_to_original(
 # --------------------------------------------------------------------------------------------------- LABELS OPERATIONS
 
 
-def to_categorical(labels: Union[np.ndarray, List[float]], nb_classes: Optional[int] = None) -> np.ndarray:
+def to_categorical(labels: Union[np.ndarray, List[float]],
+                   nb_classes: Optional[int] = None) -> np.ndarray:
     """
     Convert an array of labels to binary class matrix.
 
@@ -520,7 +549,8 @@ def floats_to_one_hot(labels: np.ndarray):
 
 
 def check_and_transform_label_format(
-    labels: np.ndarray, nb_classes: Optional[int] = None, return_one_hot: bool = True
+        labels: np.ndarray, nb_classes: Optional[int] = None,
+        return_one_hot: bool = True
 ) -> np.ndarray:
     """
     Check label format and transform to one-hot-encoded labels if necessary
@@ -534,11 +564,13 @@ def check_and_transform_label_format(
         if len(labels.shape) == 2 and labels.shape[1] > 1:
             if not return_one_hot:
                 labels = np.argmax(labels, axis=1)
-        elif len(labels.shape) == 2 and labels.shape[1] == 1 and nb_classes is not None and nb_classes > 2:
+        elif len(labels.shape) == 2 and labels.shape[
+            1] == 1 and nb_classes is not None and nb_classes > 2:
             labels = np.squeeze(labels)
             if return_one_hot:
                 labels = to_categorical(labels, nb_classes)
-        elif len(labels.shape) == 2 and labels.shape[1] == 1 and nb_classes is not None and nb_classes == 2:
+        elif len(labels.shape) == 2 and labels.shape[
+            1] == 1 and nb_classes is not None and nb_classes == 2:
             pass
         elif len(labels.shape) == 1:
             if return_one_hot:
@@ -578,7 +610,8 @@ def random_targets(labels: np.ndarray, nb_classes: int) -> np.ndarray:
     return to_categorical(result, nb_classes)
 
 
-def least_likely_class(x: np.ndarray, classifier: "CLASSIFIER_TYPE") -> np.ndarray:
+def least_likely_class(x: np.ndarray,
+                       classifier: "CLASSIFIER_TYPE") -> np.ndarray:
     """
     Compute the least likely class predictions for sample `x`. This strategy for choosing attack targets was used in
     (Kurakin et al., 2016).
@@ -589,10 +622,12 @@ def least_likely_class(x: np.ndarray, classifier: "CLASSIFIER_TYPE") -> np.ndarr
     :param classifier: The classifier used for computing predictions.
     :return: Least-likely class predicted by `classifier` for sample `x` in one-hot encoding.
     """
-    return to_categorical(np.argmin(classifier.predict(x), axis=1), nb_classes=classifier.nb_classes)
+    return to_categorical(np.argmin(classifier.predict(x), axis=1),
+                          nb_classes=classifier.nb_classes)
 
 
-def second_most_likely_class(x: np.ndarray, classifier: "CLASSIFIER_TYPE") -> np.ndarray:
+def second_most_likely_class(x: np.ndarray,
+                             classifier: "CLASSIFIER_TYPE") -> np.ndarray:
     """
     Compute the second most likely class predictions for sample `x`. This strategy can be used for choosing target
     labels for an attack to improve its chances to succeed.
@@ -637,12 +672,12 @@ def get_labels_np_array(preds: np.ndarray) -> np.ndarray:
 
 
 def compute_success_array(
-    classifier: "CLASSIFIER_TYPE",
-    x_clean: np.ndarray,
-    labels: np.ndarray,
-    x_adv: np.ndarray,
-    targeted: bool = False,
-    batch_size: int = 1,
+        classifier: "CLASSIFIER_TYPE",
+        x_clean: np.ndarray,
+        labels: np.ndarray,
+        x_adv: np.ndarray,
+        targeted: bool = False,
+        batch_size: int = 1,
 ) -> float:
     """
     Compute the success rate of an attack based on clean samples, adversarial samples and targets or correct labels.
@@ -675,12 +710,12 @@ def compute_success_array(
 
 
 def compute_success(
-    classifier: "CLASSIFIER_TYPE",
-    x_clean: np.ndarray,
-    labels: np.ndarray,
-    x_adv: np.ndarray,
-    targeted: bool = False,
-    batch_size: int = 1,
+        classifier: "CLASSIFIER_TYPE",
+        x_clean: np.ndarray,
+        labels: np.ndarray,
+        x_adv: np.ndarray,
+        targeted: bool = False,
+        batch_size: int = 1,
 ) -> float:
     """
     Compute the success rate of an attack based on clean samples, adversarial samples and targets or correct labels.
@@ -694,11 +729,13 @@ def compute_success(
     :param batch_size: Batch size.
     :return: Percentage of successful adversarial samples.
     """
-    attack_success = compute_success_array(classifier, x_clean, labels, x_adv, targeted, batch_size)
+    attack_success = compute_success_array(classifier, x_clean, labels, x_adv,
+                                           targeted, batch_size)
     return np.sum(attack_success) / x_adv.shape[0]
 
 
-def compute_accuracy(preds: np.ndarray, labels: np.ndarray, abstain: bool = True) -> Tuple[np.ndarray, int]:
+def compute_accuracy(preds: np.ndarray, labels: np.ndarray,
+                     abstain: bool = True) -> Tuple[np.ndarray, int]:
     """
     Compute the accuracy rate and coverage rate of predictions
     In the case where predictions are abstained, those samples are ignored.
@@ -726,7 +763,7 @@ def compute_accuracy(preds: np.ndarray, labels: np.ndarray, abstain: bool = True
 
 
 def load_cifar10(
-    raw: bool = False,
+        raw: bool = False,
 ) -> DATASET_TYPE:
     """
     Loads CIFAR10 dataset from config.CIFAR10_PATH or downloads it if necessary.
@@ -760,8 +797,8 @@ def load_cifar10(
         temp2 = data[:, 1, :, :].reshape(data.shape[0], 1, 32, 32)
         temp3 = data[:, 2, :, :].reshape(data.shape[0], 1, 32, 32)
         # Add these back when using mnist
-        #data = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3 # rgb to grayscale for mnist
-        #data = data[:, :, 2:30, 2:30] # convert to 28x28
+        # data = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3 # rgb to grayscale for mnist
+        # data = data[:, :, 2:30, 2:30] # convert to 28x28
         return data, labels
 
     path = get_file(
@@ -774,15 +811,15 @@ def load_cifar10(
     num_train_samples = 50000
 
     x_train = np.zeros((num_train_samples, 3, 32, 32), dtype=np.uint8)
-    #x_train = np.zeros((num_train_samples, 1, 28, 28), dtype=np.uint8)
+    # x_train = np.zeros((num_train_samples, 1, 28, 28), dtype=np.uint8)
     y_train = np.zeros((num_train_samples,), dtype=np.uint8)
 
     for i in range(1, 6):
         fpath = os.path.join(path, "data_batch_" + str(i))
         data, labels = load_batch(fpath)
-        #print("SHAPE", data.shape)
-        x_train[(i - 1) * 10000 : i * 10000, :, :, :] = data
-        y_train[(i - 1) * 10000 : i * 10000] = labels
+        # print("SHAPE", data.shape)
+        x_train[(i - 1) * 10000: i * 10000, :, :, :] = data
+        y_train[(i - 1) * 10000: i * 10000] = labels
 
     fpath = os.path.join(path, "test_batch")
     x_test, y_test = load_batch(fpath)
@@ -803,7 +840,7 @@ def load_cifar10(
 
 
 def load_cifar100(
-    raw: bool = False,
+        raw: bool = False,
 ) -> DATASET_TYPE:
     """
     Loads CIFAR10 dataset from config.CIFAR10_PATH or downloads it if necessary.
@@ -854,8 +891,8 @@ def load_cifar100(
     for i in range(1, 6):
         fpath = os.path.join(path, "data_batch_" + str(i))
         data, labels = load_batch(fpath)
-        x_train[(i - 1) * 10000 : i * 10000, :, :, :] = data
-        y_train[(i - 1) * 10000 : i * 10000] = labels
+        x_train[(i - 1) * 10000: i * 10000, :, :, :] = data
+        y_train[(i - 1) * 10000: i * 10000] = labels
 
     fpath = os.path.join(path, "test_batch")
     x_test, y_test = load_batch(fpath)
@@ -875,9 +912,8 @@ def load_cifar100(
     return (x_train, y_train), (x_test, y_test), min_, max_
 
 
-
 def load_mnist(
-    raw: bool = False,
+        raw: bool = False,
 ) -> DATASET_TYPE:
     """
     Loads MNIST dataset from `config.ART_DATA_PATH` or downloads it if necessary.
@@ -909,8 +945,9 @@ def load_mnist(
 
     return (x_train, y_train), (x_test, y_test), min_, max_
 
+
 def load_svhn(
-    raw: bool = False,
+        raw: bool = False,
 ) -> DATASET_TYPE:
     """
     Loads CIFAR10 dataset from config.CIFAR10_PATH or downloads it if necessary.
@@ -922,10 +959,16 @@ def load_svhn(
     """
 
     from scipy.io import loadmat
-    path1 = "/ssd003/home/akaleem/data/SVHN/train_32x32.mat"
-    path2 = "/ssd003/home/akaleem/data/SVHN/test_32x32.mat"
-    train_raw = loadmat(path1)
-    test_raw = loadmat(path2)
+
+    user = getpass.getuser()
+
+    if user == 'nicolas':
+        path = "/home/nicolas/data/svhn/"
+    else:
+        path = "/ssd003/home/akaleem/data/SVHN/"
+
+    train_raw = loadmat(path + 'train_32x32.mat')
+    test_raw = loadmat(path + 'test_32x32.mat')
 
     num_train_samples = 50000
 
@@ -945,15 +988,14 @@ def load_svhn(
     temp1 = x_train[:, 0, :, :].reshape(x_train.shape[0], 1, 32, 32)
     temp2 = x_train[:, 1, :, :].reshape(x_train.shape[0], 1, 32, 32)
     temp3 = x_train[:, 2, :, :].reshape(x_train.shape[0], 1, 32, 32)
-    x_train = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3 # rgb to grayscale for mnist
-    x_train = x_train[:, :, 2:30, 2:30] # convert to 28x28
+    x_train = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3  # rgb to grayscale for mnist
+    x_train = x_train[:, :, 2:30, 2:30]  # convert to 28x28
 
     temp1 = x_test[:, 0, :, :].reshape(x_test.shape[0], 1, 32, 32)
     temp2 = x_test[:, 1, :, :].reshape(x_test.shape[0], 1, 32, 32)
     temp3 = x_test[:, 2, :, :].reshape(x_test.shape[0], 1, 32, 32)
-    x_test = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3 # rgb to grayscale for mnist
-    x_test = x_test[:, :, 2:30, 2:30] # convert to 28x28
-
+    x_test = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3  # rgb to grayscale for mnist
+    x_test = x_test[:, :, 2:30, 2:30]  # convert to 28x28
 
     # Set channels last
     # x_train = x_train.transpose((0, 2, 3, 1))
@@ -971,7 +1013,6 @@ def load_svhn(
         x_test, y_test = preprocess(x_test, y_test, clip_values=(0, 255))
 
     return (x_train, y_train), (x_test, y_test), min_, max_
-
 
 
 def load_stl() -> DATASET_TYPE:
@@ -1037,12 +1078,13 @@ def load_iris(raw: bool = False, test_set: float = 0.3) -> DATASET_TYPE:
 
     # Split training and test sets
     split_index = int((1 - test_set) * len(data) / 3)
-    x_train = np.vstack((data[:split_index], data[50 : 50 + split_index], data[100 : 100 + split_index]))
+    x_train = np.vstack((data[:split_index], data[50: 50 + split_index],
+                         data[100: 100 + split_index]))
     y_train = np.vstack(
         (
             labels[:split_index],
-            labels[50 : 50 + split_index],
-            labels[100 : 100 + split_index],
+            labels[50: 50 + split_index],
+            labels[100: 100 + split_index],
         )
     )
 
@@ -1053,15 +1095,15 @@ def load_iris(raw: bool = False, test_set: float = 0.3) -> DATASET_TYPE:
         x_test = np.vstack(
             (
                 data[split_index:50],
-                data[50 + split_index : 100],
-                data[100 + split_index :],
+                data[50 + split_index: 100],
+                data[100 + split_index:],
             )
         ).astype(np.float32)
         y_test = np.vstack(
             (
                 labels[split_index:50],
-                labels[50 + split_index : 100],
-                labels[100 + split_index :],
+                labels[50 + split_index: 100],
+                labels[100 + split_index:],
             )
         )
         assert len(x_train) + len(x_test) == 150
@@ -1072,7 +1114,8 @@ def load_iris(raw: bool = False, test_set: float = 0.3) -> DATASET_TYPE:
 
     # Shuffle training set
     random_indices = np.random.permutation(len(y_train))
-    x_train, y_train = x_train[random_indices].astype(np.float32), y_train[random_indices]
+    x_train, y_train = x_train[random_indices].astype(np.float32), y_train[
+        random_indices]
 
     return (x_train, y_train), (x_test, y_test), min_, max_
 
@@ -1109,7 +1152,8 @@ def load_diabetes(raw: bool = False, test_set: float = 0.3) -> DATASET_TYPE:
     return (x_train, y_train), (x_test, y_test), min_, max_
 
 
-def load_nursery(raw: bool = False, test_set: float = 0.2, transform_social: bool = False) -> DATASET_TYPE:
+def load_nursery(raw: bool = False, test_set: float = 0.2,
+                 transform_social: bool = False) -> DATASET_TYPE:
     """
     Loads the UCI Nursery dataset from `config.ART_DATA_PATH` or downloads it if necessary.
 
@@ -1134,17 +1178,21 @@ def load_nursery(raw: bool = False, test_set: float = 0.2, transform_social: boo
     )
 
     # load data
-    features_names = ["parents", "has_nurs", "form", "children", "housing", "finance", "social", "health", "label"]
-    categorical_features = ["parents", "has_nurs", "form", "housing", "finance", "social", "health"]
+    features_names = ["parents", "has_nurs", "form", "children", "housing",
+                      "finance", "social", "health", "label"]
+    categorical_features = ["parents", "has_nurs", "form", "housing", "finance",
+                            "social", "health"]
     data = pd.read_csv(path, sep=",", names=features_names, engine="python")
     # remove rows with missing label or too sparse label
     data = data.dropna(subset=["label"])
-    data.drop(data.loc[data["label"] == "recommend"].index, axis=0, inplace=True)
+    data.drop(data.loc[data["label"] == "recommend"].index, axis=0,
+              inplace=True)
 
     # fill missing values
     data["children"] = data["children"].fillna(0)
 
-    for col in ["parents", "has_nurs", "form", "housing", "finance", "social", "health"]:
+    for col in ["parents", "has_nurs", "form", "housing", "finance", "social",
+                "health"]:
         data[col] = data[col].fillna("other")
 
     # make categorical label
@@ -1178,7 +1226,8 @@ def load_nursery(raw: bool = False, test_set: float = 0.2, transform_social: boo
         for feature in categorical_features:
             all_values = data.loc[:, feature]
             values = list(all_values.unique())
-            data[feature] = pd.Categorical(data.loc[:, feature], categories=values, ordered=False)
+            data[feature] = pd.Categorical(data.loc[:, feature],
+                                           categories=values, ordered=False)
             one_hot_vector = pd.get_dummies(data[feature], prefix=feature)
             data = pd.concat([data, one_hot_vector], axis=1)
             features_to_remove.append(feature)
@@ -1189,7 +1238,8 @@ def load_nursery(raw: bool = False, test_set: float = 0.2, transform_social: boo
         features = data.drop(["label"], axis=1)
         scaler = sklearn.preprocessing.StandardScaler()
         scaler.fit(features)
-        scaled_features = pd.DataFrame(scaler.transform(features), columns=features.columns)
+        scaled_features = pd.DataFrame(scaler.transform(features),
+                                       columns=features.columns)
 
         data = pd.concat([label, scaled_features], axis=1, join="inner")
 
@@ -1197,7 +1247,9 @@ def load_nursery(raw: bool = False, test_set: float = 0.2, transform_social: boo
     min_, max_ = np.amin(features.to_numpy()), np.amax(features.to_numpy())
 
     # Split training and test sets
-    stratified = sklearn.model_selection.StratifiedShuffleSplit(n_splits=1, test_size=test_set, random_state=18)
+    stratified = sklearn.model_selection.StratifiedShuffleSplit(n_splits=1,
+                                                                test_size=test_set,
+                                                                random_state=18)
     for train_set_i, test_set_i in stratified.split(data, data["label"]):
         train = data.iloc[train_set_i]
         test = data.iloc[test_set_i]
@@ -1210,7 +1262,7 @@ def load_nursery(raw: bool = False, test_set: float = 0.2, transform_social: boo
 
 
 def load_dataset(
-    name: str,
+        name: str,
 ) -> DATASET_TYPE:
     """
     Loads or downloads the dataset corresponding to `name`. Options are: `mnist`, `cifar10`, `stl10`, `iris`, `nursery`
@@ -1237,7 +1289,8 @@ def load_dataset(
     if "diabetes" in name:
         return load_diabetes()
 
-    raise NotImplementedError("There is no loader for dataset '{}'.".format(name))
+    raise NotImplementedError(
+        "There is no loader for dataset '{}'.".format(name))
 
 
 def _extract(full_path: str, path: str) -> bool:
@@ -1258,7 +1311,9 @@ def _extract(full_path: str, path: str) -> bool:
 
     try:
         archive.extractall(path)
-    except (tarfile.TarError, RuntimeError, KeyboardInterrupt):  # pragma: no cover
+    except (
+            tarfile.TarError, RuntimeError,
+            KeyboardInterrupt):  # pragma: no cover
         if os.path.exists(path):
             if os.path.isfile(path):
                 os.remove(path)
@@ -1268,7 +1323,8 @@ def _extract(full_path: str, path: str) -> bool:
     return True
 
 
-def get_file(filename: str, url: str, path: Optional[str] = None, extract: bool = False, verbose: bool = False) -> str:
+def get_file(filename: str, url: str, path: Optional[str] = None,
+             extract: bool = False, verbose: bool = False) -> str:
     """
     Downloads a file from a URL if it not already in the cache. The file at indicated by `url` is downloaded to the
     path `path` (default is ~/.art/data). and given the name `filename`. Files in tar, tar.gz, tar.bz, and zip formats
@@ -1318,7 +1374,8 @@ def get_file(filename: str, url: str, path: Optional[str] = None, extract: bool 
                     with tqdm() as t_bar:
                         last_block = [0]
 
-                        def progress_bar(blocks: int = 1, block_size: int = 1, total_size: Optional[int] = None):
+                        def progress_bar(blocks: int = 1, block_size: int = 1,
+                                         total_size: Optional[int] = None):
                             """
                             :param blocks: Number of blocks transferred so far [default: 1].
                             :param block_size: Size of each block (in tqdm units) [default: 1].
@@ -1326,7 +1383,8 @@ def get_file(filename: str, url: str, path: Optional[str] = None, extract: bool 
                             """
                             if total_size not in (None, -1):
                                 t_bar.total = total_size
-                            displayed = t_bar.update((blocks - last_block[0]) * block_size)
+                            displayed = t_bar.update(
+                                (blocks - last_block[0]) * block_size)
                             last_block[0] = blocks
                             return displayed
 
@@ -1335,9 +1393,11 @@ def get_file(filename: str, url: str, path: Optional[str] = None, extract: bool 
                     urlretrieve(url, full_path)
 
             except HTTPError as exception:  # pragma: no cover
-                raise Exception(error_msg.format(url, exception.code, exception.msg)) from HTTPError  # type: ignore
+                raise Exception(error_msg.format(url, exception.code,
+                                                 exception.msg)) from HTTPError  # type: ignore
             except URLError as exception:  # pragma: no cover
-                raise Exception(error_msg.format(url, exception.errno, exception.reason)) from HTTPError
+                raise Exception(error_msg.format(url, exception.errno,
+                                                 exception.reason)) from HTTPError
         except (Exception, KeyboardInterrupt):  # pragma: no cover
             if os.path.exists(full_path):
                 os.remove(full_path)
@@ -1361,7 +1421,8 @@ def make_directory(dir_path: str) -> None:
         os.makedirs(dir_path)
 
 
-def clip_and_round(x: np.ndarray, clip_values: Optional["CLIP_VALUES_TYPE"], round_samples: float) -> np.ndarray:
+def clip_and_round(x: np.ndarray, clip_values: Optional["CLIP_VALUES_TYPE"],
+                   round_samples: float) -> np.ndarray:
     """
     Rounds the input to the correct level of granularity.
     Useful to ensure data passed to classifier can be represented
@@ -1383,10 +1444,10 @@ def clip_and_round(x: np.ndarray, clip_values: Optional["CLIP_VALUES_TYPE"], rou
 
 
 def preprocess(
-    x: np.ndarray,
-    y: np.ndarray,
-    nb_classes: int = 10,
-    clip_values: Optional["CLIP_VALUES_TYPE"] = None,
+        x: np.ndarray,
+        y: np.ndarray,
+        nb_classes: int = 10,
+        clip_values: Optional["CLIP_VALUES_TYPE"] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Scales `x` to [0, 1] and converts `y` to class categorical confidences.
@@ -1409,7 +1470,8 @@ def preprocess(
     return normalized_x, categorical_y
 
 
-def segment_by_class(data: Union[np.ndarray, List[int]], classes: np.ndarray, num_classes: int) -> List[np.ndarray]:
+def segment_by_class(data: Union[np.ndarray, List[int]], classes: np.ndarray,
+                     num_classes: int) -> List[np.ndarray]:
     """
     Returns segmented data according to specified features.
 
@@ -1431,12 +1493,12 @@ def segment_by_class(data: Union[np.ndarray, List[int]], classes: np.ndarray, nu
 
 
 def performance_diff(
-    model1: "CLASSIFIER_TYPE",
-    model2: "CLASSIFIER_TYPE",
-    test_data: np.ndarray,
-    test_labels: np.ndarray,
-    perf_function: Union[str, Callable] = "accuracy",
-    **kwargs,
+        model1: "CLASSIFIER_TYPE",
+        model2: "CLASSIFIER_TYPE",
+        test_data: np.ndarray,
+        test_labels: np.ndarray,
+        perf_function: Union[str, Callable] = "accuracy",
+        **kwargs,
 ) -> float:
     """
     Calculates the difference in performance between two models on the test_data with a performance function.
@@ -1472,9 +1534,12 @@ def performance_diff(
         return model1_f1 - model2_f1
 
     if callable(perf_function):
-        return perf_function(test_labels, model1_labels, **kwargs) - perf_function(test_labels, model2_labels, **kwargs)
+        return perf_function(test_labels, model1_labels,
+                             **kwargs) - perf_function(test_labels,
+                                                       model2_labels, **kwargs)
 
-    raise ValueError("Performance function '{}' not supported".format(str(perf_function)))
+    raise ValueError(
+        "Performance function '{}' not supported".format(str(perf_function)))
 
 
 def is_probability(vector: np.ndarray) -> bool:
