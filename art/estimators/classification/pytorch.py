@@ -456,6 +456,135 @@ class PyTorchClassifier(ClassGradientsMixin, ClassifierMixin,
             print(
                 f"epoch: {epoch_nr}, acc: {acc}, loss: {loss}, elapsed_time: {elapsed_time}")
 
+    def fit_test(self, x: np.ndarray, y: np.ndarray, x_test: np.ndarray,
+                 y_test: np.ndarray, batch_size: int = 128, nb_epochs: int = 10,
+                 **kwargs) -> None:
+        """
+        Fit the classifier on the training set `(x, y)`.
+
+        :param x: Training data.
+        :param y: Target train values (class labels) one-hot-encoded of shape (nb_samples, nb_classes) or index labels of
+                  shape (nb_samples,).
+        :param x_test: Test data.
+        :param y_test: Target test values (class labels) one-hot-encoded of shape (nb_samples, nb_classes) or index labels of
+                  shape (nb_samples,).
+        :param batch_size: Size of batches.
+        :param nb_epochs: Number of epochs to use for training.
+        :param kwargs: Dictionary of framework-specific arguments. This parameter is not currently supported for PyTorch
+               and providing it takes no effect.
+        """
+        import torch  # lgtm [py/repeated-import]
+
+        if self._optimizer is None:  # pragma: no cover
+            raise ValueError(
+                "An optimizer is needed to train the model, but none for provided.")
+
+        y = check_and_transform_label_format(y, self.nb_classes)
+        y_test = check_and_transform_label_format(y_test, self.nb_classes)
+
+        # Apply preprocessing
+        x_preprocessed, y_preprocessed = self._apply_preprocessing(
+            x, y, fit=True)
+        x_preprocessed_test, y_preprocessed_test = self._apply_preprocessing(
+            x_test, y_test, fit=False)
+
+        # Check label shape
+        y_preprocessed = self.reduce_labels(y_preprocessed)
+        y_preprocessed_test = self.reduce_labels(y_preprocessed_test)
+
+        num_batch = int(np.ceil(len(x_preprocessed) / float(batch_size)))
+        ind = np.arange(len(x_preprocessed))
+
+        num_batch_test = int(
+            np.ceil(len(x_preprocessed_test) / float(batch_size)))
+        ind_test = np.arange(len(x_preprocessed_test))
+
+        # Start training
+        for epoch_nr in range(nb_epochs):
+            # Shuffle the examples
+            random.shuffle(ind)
+
+            start = time.time()
+            loss = None
+
+            # Train for one epoch
+            targets = []
+            predicts = []
+
+            # Put the model in the training mode
+            self._model.train()
+
+            for m in range(num_batch):
+                i_batch = torch.tensor(x_preprocessed[ind[m * batch_size: (
+                                                                                  m + 1) * batch_size]]).to(
+                    self._device)
+                o_batch = torch.tensor(y_preprocessed[ind[m * batch_size: (
+                                                                                  m + 1) * batch_size]]).to(
+                    self._device)
+
+                # Zero the parameter gradients
+                self._optimizer.zero_grad()
+
+                # Perform prediction
+                model_outputs = self._model(i_batch)[-1]
+
+                # Form the loss function
+                loss = self._loss(model_outputs, o_batch)
+
+                # Do training
+                if self._use_amp:  # pragma: no cover
+                    from apex import amp  # pylint: disable=E0611
+
+                    with amp.scale_loss(loss, self._optimizer) as scaled_loss:
+                        scaled_loss.backward()
+
+                else:
+                    loss.backward()
+
+                self._optimizer.step()
+
+                predicts.extend(
+                    torch.argmax(model_outputs, dim=1).detach().cpu().numpy())
+                targets.extend(o_batch.detach().cpu().numpy())
+
+            if self._scheduler is not None:
+                self._scheduler.step()
+
+            correct = np.array(predicts) == np.array(targets)
+            correct = correct.astype(int)
+            acc = correct.sum() / len(correct)
+
+            # Test model
+
+            self._model.eval()
+            targets = []
+            predicts = []
+            for m in range(num_batch_test):
+                i_batch = torch.tensor(
+                    x_preprocessed_test[
+                        ind_test[m * batch_size: (m + 1) * batch_size]]).to(
+                    self._device)
+                o_batch = torch.tensor(
+                    y_preprocessed_test[
+                        ind_test[m * batch_size: (m + 1) * batch_size]]).to(
+                    self._device)
+
+                # Perform prediction
+                model_outputs = self._model(i_batch)[-1]
+
+                predicts.extend(
+                    torch.argmax(model_outputs, dim=1).detach().cpu().numpy())
+                targets.extend(o_batch.detach().cpu().numpy())
+
+            correct = np.array(predicts) == np.array(targets)
+            correct = correct.astype(int)
+            acc_test = correct.sum() / len(correct)
+
+            stop = time.time()
+            elapsed_time = stop - start
+            print(
+                f"epoch: {epoch_nr}, acc: {acc}, acc_test: {acc_test}, loss: {loss}, elapsed_time: {elapsed_time}")
+
     def fit_generator(self, generator: "DataGenerator", nb_epochs: int = 20,
                       **kwargs) -> None:
         """

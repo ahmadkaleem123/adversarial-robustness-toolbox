@@ -81,7 +81,7 @@ class TestKnockoffNets:
                 (self.x_test_attack.shape[0], 3, 32, 32)).astype(np.float32)
 
             batch_size = BATCH_SIZE
-            nb_epochs = 200
+            nb_epochs = 20
 
         elif self.dataset == 'mnist':
             self.x_train_victim, self.y_train_victim, self.x_test_victim, self.y_test_victim = create_image_dataset(
@@ -114,12 +114,13 @@ class TestKnockoffNets:
             f.write("Starting training\n")
             f.flush()
 
-
-            victim_ptc.fit(  # train the victim and save
+            victim_ptc.fit_test(  # train the victim and save
                 x=self.x_train_victim,
                 y=self.y_train_victim,
+                x_test=self.x_test_victim,
+                y_test=self.y_test_victim,
                 batch_size=batch_size,
-                nb_epochs=1,
+                nb_epochs=nb_epochs,
             )
             if hasattr(victim_ptc.model, 'module'):
                 model = victim_ptc.model.module
@@ -206,7 +207,7 @@ if __name__ == "__main__":
     dataset = 'cifar10'
 
     if dataset == 'cifar10':
-        train = False
+        train = True
     elif dataset == 'mnist':
         train = True
     else:
