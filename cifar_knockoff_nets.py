@@ -30,9 +30,17 @@ from tests.utils import get_image_classifier_pt
 logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 128
-NB_STOLEN = 5000
+NB_STOLEN = 1000
 f = open("logs.txt", "w")
 global victim_ptc
+
+
+def get_acc(model, x, target):
+    preds = np.argmax(model.predict(x=x), axis=1)
+    targets = np.argmax(target, axis=1)
+    count = np.sum((preds == targets).astype(int))
+    acc = count / len(preds)
+    return acc, preds
 
 
 class TestKnockoffNets:
@@ -56,22 +64,24 @@ class TestKnockoffNets:
             self.x_train_attack, self.y_train_attack, self.x_test_attack, self.y_test_attack = create_image_dataset(
                 n_train=50000, n_test=10000, dataset="cifar100")
 
-            self.x_train_victim = np.reshape(self.x_train_victim, (
-                self.x_train_victim.shape[0], 3, 32, 32)).astype(np.float32)
+            self.x_train_victim = np.reshape(
+                self.x_train_victim,
+                (self.x_train_victim.shape[0], 3, 32, 32)).astype(np.float32)
 
             self.x_test_victim = np.reshape(
                 self.x_test_victim,
                 (self.x_test_victim.shape[0], 3, 32, 32)).astype(np.float32)
 
-            self.x_train_attack = np.reshape(self.x_train_attack, (
-                self.x_train_attack.shape[0], 3, 32, 32)).astype(np.float32)
+            self.x_train_attack = np.reshape(
+                self.x_train_attack,
+                (self.x_train_attack.shape[0], 3, 32, 32)).astype(np.float32)
 
             self.x_test_attack = np.reshape(
                 self.x_test_attack,
                 (self.x_test_attack.shape[0], 3, 32, 32)).astype(np.float32)
 
             batch_size = BATCH_SIZE
-            nb_epochs = 300
+            nb_epochs = 200
 
         elif self.dataset == 'mnist':
             self.x_train_victim, self.y_train_victim, self.x_test_victim, self.y_test_victim = create_image_dataset(
@@ -104,11 +114,12 @@ class TestKnockoffNets:
             f.write("Starting training\n")
             f.flush()
 
+
             victim_ptc.fit(  # train the victim and save
                 x=self.x_train_victim,
                 y=self.y_train_victim,
                 batch_size=batch_size,
-                nb_epochs=nb_epochs,
+                nb_epochs=1,
             )
             if hasattr(victim_ptc.model, 'module'):
                 model = victim_ptc.model.module
@@ -117,13 +128,13 @@ class TestKnockoffNets:
             torch.save(model.state_dict(),
                        f"model-{self.dataset}.pth.tar")
 
-        victim_preds = np.argmax(
-            victim_ptc.predict(x=self.x_test_victim), axis=1)
-        y_test_preds = np.argmax(
-            self.y_test_victim, axis=1
-        )
-        count = np.sum((victim_preds == y_test_preds).astype(int))
-        print("Victim Accuracy", count / len(victim_preds))
+        acc, victim_preds_test = get_acc(
+            model=victim_ptc, x=self.x_test_victim, target=self.y_test_victim)
+        print("Victim Accuracy Test", acc)
+
+        acc, victim_preds_train = get_acc(
+            model=victim_ptc, x=self.x_train_victim, target=self.y_train_victim)
+        print("Victim Accuracy Train", acc)
 
         # Create the thieved classifier
         if self.testrandom:
@@ -147,7 +158,8 @@ class TestKnockoffNets:
 
             thieved_preds = np.argmax(
                 thieved_ptc.predict(x=self.x_test_victim), axis=1)
-            acc = np.sum(victim_preds == thieved_preds) / len(victim_preds)
+            acc = np.sum(victim_preds_test == thieved_preds) / len(
+                thieved_preds)
             count = 0
             for i in range(len(thieved_preds)):
                 if np.argmax(self.y_test_victim[i]) == thieved_preds[i]:
@@ -178,14 +190,15 @@ class TestKnockoffNets:
 
             thieved_preds = np.argmax(
                 thieved_ptc.predict(x=self.x_test_victim), axis=1)
-            acc = np.sum(victim_preds == thieved_preds) / len(victim_preds)
+            acc = np.sum(victim_preds_test == thieved_preds) / len(
+                thieved_preds)
             count = 0
             for i in range(len(thieved_preds)):
                 if np.argmax(self.y_test_victim[i]) == thieved_preds[i]:
                     count += 1
             print("Fidelity Accuracy", acc)
-            print("Target Accuracy", count / len(victim_preds))
-            f.write(f"Adaptive accuracy: {count / len(victim_preds)}")
+            print("Target Accuracy", count / len(thieved_preds))
+            f.write(f"Adaptive accuracy: {count / len(thieved_preds)}")
         f.close()
 
 
@@ -193,7 +206,7 @@ if __name__ == "__main__":
     dataset = 'cifar10'
 
     if dataset == 'cifar10':
-        train = True
+        train = False
     elif dataset == 'mnist':
         train = True
     else:

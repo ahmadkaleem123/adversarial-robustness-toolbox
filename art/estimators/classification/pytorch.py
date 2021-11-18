@@ -402,7 +402,7 @@ class PyTorchClassifier(ClassGradientsMixin, ClassifierMixin,
         ind = np.arange(len(x_preprocessed))
 
         # Start training
-        for _ in range(nb_epochs):
+        for epoch_nr in range(nb_epochs):
             # Shuffle the examples
             random.shuffle(ind)
 
@@ -410,7 +410,6 @@ class PyTorchClassifier(ClassGradientsMixin, ClassifierMixin,
             loss = None
             targets = []
             predicts = []
-            total = 0
             # Train for one epoch
             for m in range(num_batch):
                 i_batch = torch.tensor(x_preprocessed[ind[m * batch_size: (
@@ -454,7 +453,8 @@ class PyTorchClassifier(ClassGradientsMixin, ClassifierMixin,
 
             stop = time.time()
             elapsed_time = stop - start
-            print(f"acc: {acc}, loss: {loss}, elapsed_time: {elapsed_time}")
+            print(
+                f"epoch: {epoch_nr}, acc: {acc}, loss: {loss}, elapsed_time: {elapsed_time}")
 
     def fit_generator(self, generator: "DataGenerator", nb_epochs: int = 20,
                       **kwargs) -> None:

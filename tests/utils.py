@@ -1028,16 +1028,8 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
     :return: PyTorchClassifier
     """
     import torch
-    import torch.distributed as dist
 
     from art.estimators.classification.pytorch import PyTorchClassifier
-
-    def setup(rank=-1, world_size=-1):
-        os.environ['MASTER_ADDR'] = 'localhost'
-        os.environ['MASTER_PORT'] = '12355'
-
-        # initialize the process group
-        dist.init_process_group("nccl", rank=rank, world_size=world_size)
 
     # Define the network
     if dataset == None or dataset == "mnist":
@@ -1061,7 +1053,7 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
             #             output_device=device_ids)
             model = torch.nn.DataParallel(module=model, device_ids=device_ids)
 
-        lr = 0.0001
+        lr = 0.1
 
     # Define a loss function and optimizer
     loss_fn = torch.nn.CrossEntropyLoss(reduction="mean")  # sum
