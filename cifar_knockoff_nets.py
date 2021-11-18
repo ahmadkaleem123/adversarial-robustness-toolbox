@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 64
 NB_EPOCHS = 100
-NB_STOLEN = 2000
+NB_STOLEN = 5000
 f = open("logs.txt", "w")
 global victim_ptc
 
@@ -185,11 +185,19 @@ class TestKnockoffNets:
 
 
 if __name__ == "__main__":
+    dataset = 'cifar10'
+
+    if dataset == 'cifar10':
+        train = False
+    elif dataset == 'mnist':
+        train = True
+    else:
+        raise Exception(f"Unknown dataset: {dataset}")
+
     knockoff = TestKnockoffNets(
-        train=True,
+        train=train,
         random=True,
         adaptive=True,
-        dataset='mnist',
-        # dataset='cifar10',
+        dataset=dataset,
         load_init=True)
     knockoff.runknockoff()
