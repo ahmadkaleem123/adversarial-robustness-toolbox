@@ -24,17 +24,18 @@ from __future__ import absolute_import, division, print_function, \
 import json
 import logging
 import os
-import pickle
-import random
 import time
 import unittest
 import warnings
 
 import numpy as np
+from torch.nn.parallel import DistributedDataParallel as DDP
 
 # from art.estimators.encoding.tensorflow import TensorFlowEncoder
 # from art.estimators.generation.tensorflow import TensorFlowGenerator
 from art.utils import load_dataset
+from tests.architectures.mnist_net import MnistNet
+from tests.architectures.resnet import resnet18
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +76,8 @@ class TestBase(unittest.TestCase):
 
     @classmethod
     def create_image_dataset(cls, n_train, n_test):
-        (x_train_mnist, y_train_mnist), (x_test_mnist, y_test_mnist), _, _ = load_dataset("mnist")
+        (x_train_mnist, y_train_mnist), (
+            x_test_mnist, y_test_mnist), _, _ = load_dataset("mnist")
         # include code to randomkly shuffle this
         cls.x_train_mnist = x_train_mnist[:n_train]
         cls.y_train_mnist = y_train_mnist[:n_train]
@@ -87,7 +89,8 @@ class TestBase(unittest.TestCase):
         # cls._x_test_mnist_original = cls.x_test_mnist.copy()
         # cls._y_test_mnist_original = cls.y_test_mnist.copy()
 
-        (x_train_cifar10, y_train_cifar10), (x_test_cifar10, y_test_cifar10), _, _ = load_dataset("cifar10")
+        (x_train_cifar10, y_train_cifar10), (
+            x_test_cifar10, y_test_cifar10), _, _ = load_dataset("cifar10")
         indices = np.random.choice(len(x_train_cifar10), n_train, replace=False)
         indices2 = np.random.choice(len(x_test_cifar10), n_test, replace=False)
         cls.x_train_cifar10 = x_train_cifar10[:n_train]
@@ -104,8 +107,10 @@ class TestBase(unittest.TestCase):
         # cls._x_test_cifar10_original = cls.x_test_cifar10.copy()
         # cls._y_test_cifar10_original = cls.y_test_cifar10.copy()
 
-        (x_train_cifar100, y_train_cifar100), (x_test_cifar100, y_test_cifar100), _, _ = load_dataset("cifar100")
-        indices = np.random.choice(len(x_train_cifar100), n_train, replace=False)
+        (x_train_cifar100, y_train_cifar100), (
+            x_test_cifar100, y_test_cifar100), _, _ = load_dataset("cifar100")
+        indices = np.random.choice(len(x_train_cifar100), n_train,
+                                   replace=False)
         indices2 = np.random.choice(len(x_test_cifar100), n_test, replace=False)
         # cls.x_train_cifar100 = x_train_cifar100[:n_train]
         # cls.y_train_cifar100 = y_train_cifar100[:n_train]
@@ -121,7 +126,8 @@ class TestBase(unittest.TestCase):
         # cls._x_test_cifar100_original = cls.x_test_cifar100.copy()
         # cls._y_test_cifar100_original = cls.y_test_cifar100.copy()
 
-        (x_train_svhn, y_train_svhn), (x_test_svhn, y_test_svhn), _, _ = load_dataset("svhn")
+        (x_train_svhn, y_train_svhn), (
+            x_test_svhn, y_test_svhn), _, _ = load_dataset("svhn")
         cls.x_train_svhn = x_train_svhn[:n_train]
         cls.y_train_svhn = y_train_svhn[:n_train]
         cls.x_test_svhn = x_test_svhn[:n_test]
@@ -134,7 +140,8 @@ class TestBase(unittest.TestCase):
 
     def setUp(self):
         self.time_start = time.time()
-        print("\n\n\n----------------------------------------------------------------------")
+        print(
+            "\n\n\n----------------------------------------------------------------------")
 
     def tearDown(self):
         time_end = time.time() - self.time_start
@@ -209,7 +216,7 @@ def check_adverse_example_x(x_adv, x_original, max=1.0, min=0.0, bounded=True):
     :return:
     """
     assert bool((
-                            x_original == x_adv).all()) is False, "x_test_adv should have been different from x_test"
+                        x_original == x_adv).all()) is False, "x_test_adv should have been different from x_test"
 
     if bounded:
         assert np.amax(
@@ -220,16 +227,16 @@ def check_adverse_example_x(x_adv, x_original, max=1.0, min=0.0, bounded=True):
             min)
     else:
         assert (
-                    x_adv > max).any(), "some x_test_adv values should have been above {0}".format(
+                x_adv > max).any(), "some x_test_adv values should have been above {0}".format(
             max)
         assert (
-                    x_adv < min).any(), " some x_test_adv values should have all been below {0}".format(
+                x_adv < min).any(), " some x_test_adv values should have all been below {0}".format(
             min)
 
 
 def check_adverse_predicted_sample_y(y_pred_adv, y_non_adv):
     assert bool((
-                            y_non_adv == y_pred_adv).all()) is False, "Adverse predicted sample was not what was expected"
+                        y_non_adv == y_pred_adv).all()) is False, "Adverse predicted sample was not what was expected"
 
 
 def is_valid_framework(framework):
@@ -1021,208 +1028,40 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
     :return: PyTorchClassifier
     """
     import torch
-    import torch.nn.functional as F
+    import torch.distributed as dist
 
     from art.estimators.classification.pytorch import PyTorchClassifier
 
-    if dataset == None or dataset == "mnist":
-        ### MNISTNet Architecture
-        class Model(torch.nn.Module):
-            """Class used to initialize model of student/teacher"""
+    def setup(rank=-1, world_size=-1):
+        os.environ['MASTER_ADDR'] = 'localhost'
+        os.environ['MASTER_PORT'] = '12355'
 
-            def __init__(self):
-                super(Model, self).__init__()
-                self.conv1 = torch.nn.Conv2d(1, 20, 5, 1)
-                self.conv2 = torch.nn.Conv2d(20, 50, 5, 1)
-                self.fc1 = torch.nn.Linear(4 * 4 * 50, 500)
-                self.fc2 = torch.nn.Linear(500, 10)
-
-            def forward(self, x):
-                x = F.relu(self.conv1(x))
-                x = F.max_pool2d(x, 2, 2)
-                x = F.relu(self.conv2(x))
-                x = F.max_pool2d(x, 2, 2)
-                x = x.view(-1, 4 * 4 * 50)
-                x = F.relu(self.fc1(x))
-                x = self.fc2(x)
-                return x
-    ### ResNet architecture for CIFAR
-    elif dataset == "cifar10":
-        class BasicBlock(torch.nn.Module):
-            expansion = 1
-
-            def __init__(self, in_planes, planes, stride=1):
-                super(BasicBlock, self).__init__()
-                self.conv1 = torch.nn.Conv2d(in_planes, planes, kernel_size=3,
-                                             stride=stride,
-                                             padding=1, bias=False)
-                self.bn1 = torch.nn.BatchNorm2d(planes)
-                self.conv2 = torch.nn.Conv2d(planes, planes, kernel_size=3,
-                                             stride=1,
-                                             padding=1, bias=False)
-                self.bn2 = torch.nn.BatchNorm2d(planes)
-
-                self.shortcut = torch.nn.Sequential()
-                if stride != 1 or in_planes != self.expansion * planes:
-                    self.shortcut = torch.nn.Sequential(
-                        torch.nn.Conv2d(in_planes, self.expansion * planes,
-                                        kernel_size=1,
-                                        stride=stride, bias=False),
-                        torch.nn.BatchNorm2d(self.expansion * planes)
-                    )
-
-            def forward(self, x):
-                out = F.relu(self.bn1(self.conv1(x)))
-                out = self.bn2(self.conv2(out))
-                out += self.shortcut(x)
-                out = F.relu(out)
-                return out
-
-        class Bottleneck(torch.nn.Module):
-            expansion = 4
-
-            def __init__(self, in_planes, planes, stride=1):
-                super(Bottleneck, self).__init__()
-                self.conv1 = torch.nn.Conv2d(in_planes, planes, kernel_size=1,
-                                             bias=False)
-                self.bn1 = torch.nn.BatchNorm2d(planes)
-                self.conv2 = torch.nn.Conv2d(planes, planes, kernel_size=3,
-                                             stride=stride,
-                                             padding=1, bias=False)
-                self.bn2 = torch.nn.BatchNorm2d(planes)
-                self.conv3 = torch.nn.Conv2d(planes, self.expansion * planes,
-                                             kernel_size=1,
-                                             bias=False)
-                self.bn3 = torch.nn.BatchNorm2d(self.expansion * planes)
-
-                self.shortcut = torch.nn.Sequential()
-                if stride != 1 or in_planes != self.expansion * planes:
-                    self.shortcut = torch.nn.Sequential(
-                        torch.nn.Conv2d(in_planes, self.expansion * planes,
-                                        kernel_size=1,
-                                        stride=stride, bias=False),
-                        torch.nn.BatchNorm2d(self.expansion * planes)
-                    )
-
-            def forward(self, x):
-                out = F.relu(self.bn1(self.conv1(x)))
-                out = F.relu(self.bn2(self.conv2(out)))
-                out = self.bn3(self.conv3(out))
-                out += self.shortcut(x)
-                out = F.relu(out)
-                return out
-
-        class ResNet(torch.nn.Module):
-            def __init__(self, block, num_blocks, num_classes=10, name=''):
-                super(ResNet, self).__init__()
-                self.in_planes = 64
-                self.name = name
-                self.num_classes = num_classes
-                self.conv1 = torch.nn.Conv2d(3, 64, kernel_size=3, stride=1,
-                                             padding=1,
-                                             bias=False)
-                self.bn1 = torch.nn.BatchNorm2d(64)
-                self.layer1 = self._make_layer(block, 64, num_blocks[0],
-                                               stride=1)
-                self.layer2 = self._make_layer(block, 128, num_blocks[1],
-                                               stride=2)
-                self.layer3 = self._make_layer(block, 256, num_blocks[2],
-                                               stride=2)
-                self.layer4 = self._make_layer(block, 512, num_blocks[3],
-                                               stride=2)
-                self.linear = torch.nn.Linear(512 * block.expansion,
-                                              num_classes)
-
-            def _make_layer(self, block, planes, num_blocks, stride):
-                strides = [stride] + [1] * (num_blocks - 1)
-                layers = []
-                for stride in strides:
-                    layers.append(block(self.in_planes, planes, stride))
-                    self.in_planes = planes * block.expansion
-                return torch.nn.Sequential(*layers)
-
-            def forward(self, x):
-                out = F.relu(self.bn1(self.conv1(x)))
-                out = self.layer1(out)
-                out = self.layer2(out)
-                out = self.layer3(out)
-                out = self.layer4(out)
-                out = F.avg_pool2d(out, 4)
-                out = out.view(out.size(0), -1)
-                out = self.linear(out)
-                return out
-    # class Model(torch.nn.Module):
-    #     """
-    #     Create model for pytorch.
-    #
-    #     The weights and biases are identical to the TensorFlow model in get_classifier_tf().
-    #     """
-    #
-    #     def __init__(self):
-    #         super(Model, self).__init__()
-    #
-    #         self.conv = torch.nn.Conv2d(in_channels=1, out_channels=1, kernel_size=7)
-    #         self.relu = torch.nn.ReLU()
-    #         self.pool = torch.nn.MaxPool2d(4, 4)
-    #         self.fullyconnected = torch.nn.Linear(25, 10)
-    #
-    #         if load_init:
-    #             w_conv2d = np.load(
-    #                 os.path.join(
-    #                     os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "W_CONV2D_MNIST.npy"
-    #                 )
-    #             )
-    #             b_conv2d = np.load(
-    #                 os.path.join(
-    #                     os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "B_CONV2D_MNIST.npy"
-    #                 )
-    #             )
-    #             w_dense = np.load(
-    #                 os.path.join(
-    #                     os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "W_DENSE_MNIST.npy"
-    #                 )
-    #             )
-    #             b_dense = np.load(
-    #                 os.path.join(
-    #                     os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "B_DENSE_MNIST.npy"
-    #                 )
-    #             )
-    #
-    #             w_conv2d_pt = w_conv2d.reshape((1, 1, 7, 7))
-    #
-    #             self.conv.weight = torch.nn.Parameter(torch.Tensor(w_conv2d_pt))
-    #             self.conv.bias = torch.nn.Parameter(torch.Tensor(b_conv2d))
-    #             self.fullyconnected.weight = torch.nn.Parameter(torch.Tensor(np.transpose(w_dense)))
-    #             self.fullyconnected.bias = torch.nn.Parameter(torch.Tensor(b_dense))
-    #
-    #     # pylint: disable=W0221
-    #     # disable pylint because of API requirements for function
-    #     def forward(self, x):
-    #         """
-    #         Forward function to evaluate the model
-    #         :param x: Input to the model
-    #         :return: Prediction of the model
-    #         """
-    #         x = self.conv(x)
-    #         x = self.relu(x)
-    #         x = self.pool(x)
-    #         x = x.reshape(-1, 25)
-    #         x = self.fullyconnected(x)
-    #         if not from_logits:
-    #             x = torch.nn.functional.softmax(x, dim=1)
-    #         return x
+        # initialize the process group
+        dist.init_process_group("nccl", rank=rank, world_size=world_size)
 
     # Define the network
     if dataset == None or dataset == "mnist":
-        model = Model()
+        model = MnistNet()
         lr = 0.001
         if load_init:
             model.load_state_dict(torch.load("model-mnist.pth.tar"))
+
     elif dataset == "cifar10":
-        model = ResNet(BasicBlock, [2, 2, 2, 2])  # ResNet 18
-        lr = 0.0001
+        model = resnet18()
+
         if load_init:
             model.load_state_dict(torch.load("model-cifar10.pth.tar"))
+
+        if torch.cuda.is_available():
+            model = model.cuda()
+            max_id = torch.cuda.device_count()
+            device_ids = [i for i in range(max_id)]
+            # setup(world_size=max_id, rank=max_id - 1)
+            # model = DDP(module=model, device_ids=device_ids,
+            #             output_device=device_ids)
+            model = torch.nn.DataParallel(module=model, device_ids=device_ids)
+
+        lr = 0.0001
 
     # Define a loss function and optimizer
     loss_fn = torch.nn.CrossEntropyLoss(reduction="mean")  # sum
@@ -1774,7 +1613,6 @@ def get_tabular_classifier_pt(load_init=True):
     """
     import torch
 
-    from art.estimators.classification.pytorch import PyTorch
     """
     Create Iris model for PyTorch.
 
