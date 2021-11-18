@@ -1042,7 +1042,7 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
     # Define the network
     if dataset == None or dataset == "mnist":
         model = MnistNet()
-        lr = 0.001
+        lr = 0.1
         if load_init:
             model.load_state_dict(torch.load("model-mnist.pth.tar"))
 
@@ -1065,7 +1065,10 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
 
     # Define a loss function and optimizer
     loss_fn = torch.nn.CrossEntropyLoss(reduction="mean")  # sum
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    # optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr,
+                                momentum=0.9, weight_decay=5e-4)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=200)
     # Get classifier
     if dataset == "mnist" or dataset == None:
         ptc = PyTorchClassifier(
@@ -1075,7 +1078,8 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
     elif dataset == "cifar10":
         ptc = PyTorchClassifier(
             model=model, loss=loss_fn, optimizer=optimizer,
-            input_shape=(3, 32, 32), nb_classes=10, clip_values=(0, 1)
+            input_shape=(3, 32, 32), nb_classes=10, clip_values=(0, 1),
+            scheduler=scheduler
         )
     return ptc
 
