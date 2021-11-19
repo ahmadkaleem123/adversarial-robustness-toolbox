@@ -212,7 +212,7 @@ if __name__ == "__main__":
         train = True
     else:
         raise Exception(f"Unknown dataset: {dataset}")
-
+    train = False
     if train:
         load_init = False
     else:
