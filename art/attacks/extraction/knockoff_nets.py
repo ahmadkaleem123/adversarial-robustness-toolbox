@@ -298,6 +298,11 @@ class KnockoffNets(ExtractionAttack):
             # print("y hat", y_hat)
             probs = aux_exp / np.sum(aux_exp)
 
+        # Save all the selected indices so we can compute their privacy cost seperately.
+        import pickle
+        with open(f"selectedidxs/{self.dataset}ind{len(selected_idx)}", "wb") as fp:
+            pickle.dump(selected_idx, fp)
+
         # Train the thieved classifier the final time
         thieved_classifier.fit(
             x=x[selected_idx],

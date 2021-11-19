@@ -111,8 +111,8 @@ class TestKnockoffNets:
             #     n_train=73257, n_test=26032, dataset="svhn")
             self.x_train_victim, self.y_train_victim, self.x_test_victim, self.y_test_victim = create_image_dataset(
                 n_train=1000, n_test=1000, dataset="svhn")
-            # _, _, self.x_train_attack, self.y_train_attack = create_image_dataset(
-            #     n_train=50000, n_test=10000, dataset="imagenet")
+            _, _, self.x_train_attack, self.y_train_attack = create_image_dataset(
+                n_train=50000, n_test=10000, dataset="imagenet")
 
             self.x_train_victim = np.reshape(
                 self.x_train_victim,
@@ -122,9 +122,9 @@ class TestKnockoffNets:
                 self.x_test_victim,
                 (self.x_test_victim.shape[0], 3, 32, 32)).astype(np.float32)
 
-            # self.x_train_attack = np.reshape(
-            #     self.x_train_attack,
-            #     (self.x_train_attack.shape[0], 3, 32, 32)).astype(np.float32)
+            self.x_train_attack = np.reshape(
+                self.x_train_attack,
+                (self.x_train_attack.shape[0], 3, 32, 32)).astype(np.float32)
 
             batch_size = BATCH_SIZE
             nb_epochs = 100
@@ -245,8 +245,8 @@ if __name__ == "__main__":
 
     knockoff = TestKnockoffNets(
         train=train,
-        random=False,
-        adaptive=False,
+        random=True,
+        adaptive=True,
         dataset=dataset,
         load_init=load_init)
     knockoff.runknockoff()
