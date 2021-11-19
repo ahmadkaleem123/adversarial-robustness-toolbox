@@ -1064,20 +1064,51 @@ def load_svhn(
     # x_test = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3  # rgb to grayscale for mnist
     # x_test = x_test[:, :, 2:30, 2:30]  # convert to 28x28
     ### USE THE TORCH METHOD HERE AS WELL.
+    import torchvision.transforms as transforms
+    import torch
+    transform_train = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.RandomCrop(32, padding=4),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize((0.43768212, 0.44376972, 0.47280444),
+                             (0.19803013, 0.20101563,0.19703615)),
+    ])
+    transform_test = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.ToTensor(),
+        transforms.Normalize((0.43768212, 0.44376972, 0.47280444),
+                             (0.19803013, 0.20101563,0.19703615)),
+    ])
+    x_traintorch = torch.zeros(50000, 32, 32, 3)
+    x_testtorch = torch.zeros(10000, 32, 32, 3)
     # Set channels last
     # x_train = x_train.transpose((0, 2, 3, 1))
     # x_test = x_test.transpose((0, 2, 3, 1))
+    for i in range(1,x_train.shape[0]):
+        temp1 = transform_train(np.squeeze(x_train[i]))
+        temp1 = torch.reshape(temp1, (32,32,3))
+        x_traintorch[i, :, :, :] = temp1
+    for i in range(1, x_test.shape[0]):
+        temp1 = transform_test(np.squeeze(x_test[i]))
+        temp1 = torch.reshape(temp1, (32, 32, 3))
+        x_testtorch[i, :, :, :] = temp1
+    x_train = x_traintorch.numpy()
+    x_traintorch = None
+    x_test = x_testtorch.numpy()
+    x_testtorch = None
     y_train = np.reshape(y_train, (len(y_train), 1))
     y_test = np.reshape(y_test, (len(y_test), 1))
     y_train = y_train - 1
     y_test = y_test - 1  # svhn labels are weird
     # y_train = y_train.astype(int)
     # y_test = y_test.astype(int)
-    min_, max_ = 0.0, 255.0
-    if not raw:
-        min_, max_ = 0.0, 1.0
-        x_train, y_train = preprocess(x_train, y_train, clip_values=(0, 255))
-        x_test, y_test = preprocess(x_test, y_test, clip_values=(0, 255))
+    min_, max_ = 0.0, 1.0
+    # min_, max_ = 0.0, 255.0
+    # if not raw:
+    #     min_, max_ = 0.0, 1.0
+    #     x_train, y_train = preprocess(x_train, y_train, clip_values=(0, 255))
+    #     x_test, y_test = preprocess(x_test, y_test, clip_values=(0, 255))
 
     return (x_train, y_train), (x_test, y_test), min_, max_
 
