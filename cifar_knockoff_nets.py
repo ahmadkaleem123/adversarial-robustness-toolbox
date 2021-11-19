@@ -106,6 +106,26 @@ class TestKnockoffNets:
 
             batch_size = BATCH_SIZE
             nb_epochs = 20
+        elif self.dataset == "svhn":
+            self.x_train_victim, self.y_train_victim, self.x_test_victim, self.y_test_victim = create_image_dataset(
+                n_train=50000, n_test=10000, dataset="svhn")
+            _, _, self.x_train_attack, self.y_train_attack = create_image_dataset(
+                n_train=50000, n_test=10000, dataset="imagenet")
+
+            self.x_train_victim = np.reshape(
+                self.x_train_victim,
+                (self.x_train_victim.shape[0], 3, 32, 32)).astype(np.float32)
+
+            self.x_test_victim = np.reshape(
+                self.x_test_victim,
+                (self.x_test_victim.shape[0], 3, 32, 32)).astype(np.float32)
+
+            self.x_train_attack = np.reshape(
+                self.x_train_attack,
+                (self.x_train_attack.shape[0], 3, 32, 32)).astype(np.float32)
+
+            batch_size = BATCH_SIZE
+            nb_epochs = 100
 
         victim_ptc = get_image_classifier_pt(dataset=self.dataset,
                                              load_init=self.load_init)

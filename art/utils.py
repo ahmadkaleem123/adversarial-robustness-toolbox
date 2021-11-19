@@ -876,15 +876,16 @@ def load_cifar10(
 def load_imagenet(
         raw: bool = False,
 ) -> DATASET_TYPE:
+    from torchvision import datasets, transforms
+    import torch
+    from torch.utils.data import DataLoader
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
     preprocessing = [
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
+        transforms.Resize(32),
+        transforms.CenterCrop(32),
         transforms.ToTensor(),
         normalize,
-        transforms.Resize(28),
-        transforms.CenterCrop(28),
         ### transforms.Grayscale() If using mnist
     ]
     imagenet_dataset = datasets.ImageNet(
@@ -895,8 +896,11 @@ def load_imagenet(
         transform=transforms.Compose(preprocessing))
     ### Convert this to x_train, y_train etc. and to numpy arrays.
     # We also only use the test set.
-    x_test = None # Update
-    y_test = None # Update
+    train_loader = DataLoader(imagenet_dataset, batch_size=len(imagenet_dataset))
+    x_test = next(iter(train_loader))[0].numpy()
+    y_test = next(iter(train_loader))[1].numpy()
+    print("x_test", x_test.shape)
+    train_loader = None  # clear memory
     min_, max_ = 0.0, 1.0
     return (None, None), (x_test, y_test), min_, max_
 
@@ -1048,18 +1052,18 @@ def load_svhn(
     x_train = x_train.reshape(x_train.shape[3], 3, 32, 32)
     x_test = x_test.reshape(x_test.shape[3], 3, 32, 32)
 
-    temp1 = x_train[:, 0, :, :].reshape(x_train.shape[0], 1, 32, 32)
-    temp2 = x_train[:, 1, :, :].reshape(x_train.shape[0], 1, 32, 32)
-    temp3 = x_train[:, 2, :, :].reshape(x_train.shape[0], 1, 32, 32)
-    x_train = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3  # rgb to grayscale for mnist
-    x_train = x_train[:, :, 2:30, 2:30]  # convert to 28x28
+    # temp1 = x_train[:, 0, :, :].reshape(x_train.shape[0], 1, 32, 32)
+    # temp2 = x_train[:, 1, :, :].reshape(x_train.shape[0], 1, 32, 32)
+    # temp3 = x_train[:, 2, :, :].reshape(x_train.shape[0], 1, 32, 32)
+    # x_train = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3  # rgb to grayscale for mnist
+    # x_train = x_train[:, :, 2:30, 2:30]  # convert to 28x28
 
-    temp1 = x_test[:, 0, :, :].reshape(x_test.shape[0], 1, 32, 32)
-    temp2 = x_test[:, 1, :, :].reshape(x_test.shape[0], 1, 32, 32)
-    temp3 = x_test[:, 2, :, :].reshape(x_test.shape[0], 1, 32, 32)
-    x_test = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3  # rgb to grayscale for mnist
-    x_test = x_test[:, :, 2:30, 2:30]  # convert to 28x28
-
+    # temp1 = x_test[:, 0, :, :].reshape(x_test.shape[0], 1, 32, 32)
+    # temp2 = x_test[:, 1, :, :].reshape(x_test.shape[0], 1, 32, 32)
+    # temp3 = x_test[:, 2, :, :].reshape(x_test.shape[0], 1, 32, 32)
+    # x_test = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3  # rgb to grayscale for mnist
+    # x_test = x_test[:, :, 2:30, 2:30]  # convert to 28x28
+    ### USE THE TORCH METHOD HERE AS WELL.
     # Set channels last
     # x_train = x_train.transpose((0, 2, 3, 1))
     # x_test = x_test.transpose((0, 2, 3, 1))
@@ -1672,3 +1676,6 @@ def from_cuda(x: "torch.Tensor") -> "torch.Tensor":
     if use_cuda:  # pragma: no cover
         x = x.cpu()
     return x
+
+if __name__ == "__main__":
+    load_imagenet()

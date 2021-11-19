@@ -193,6 +193,13 @@ def create_image_dataset(n_train, n_test, dataset):
         y_train = y_train_cifar100[:n_train]
         x_test = x_test_cifar100[:n_test]
         y_test = y_test_cifar100[:n_test]
+    elif dataset == "imagenet":
+        (_, _), (
+            x_test_imagenet, y_test_imagenet), _, _ = load_dataset("imagenet")
+        x_train = None
+        y_train = None
+        x_test = x_test_imagenet[:n_train]
+        y_test = y_test_imagenet[:n_train]
     return x_train, y_train, x_test, y_test
 
 
@@ -1045,7 +1052,23 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None, ada
             import dfmenetwork
             model = dfmenetwork.resnet_8x.ResNet34_8x(num_classes=10)
             model.load_state_dict(torch.load('cifar10-resnet34_8x.pt'))
+        if torch.cuda.is_available():
+            model = model.cuda()
+            max_id = torch.cuda.device_count()
+            device_ids = [i for i in range(max_id)]
+            # setup(world_size=max_id, rank=max_id - 1)
+            # model = DDP(module=model, device_ids=device_ids,
+            #             output_device=device_ids)
+            model = torch.nn.DataParallel(module=model, device_ids=device_ids)
 
+        lr = 0.01
+    elif dataset == "svhn":
+        model = resnet18()
+        if load_init:
+            # model.load_state_dict(torch.load("model-svhn.pth.tar"))
+            import dfmenetwork
+            model = dfmenetwork.resnet_8x.ResNet34_8x(num_classes=10)
+            model.load_state_dict(torch.load('svhn-resnet34_8x.pt'))
 
         if torch.cuda.is_available():
             model = model.cuda()
