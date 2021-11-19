@@ -107,8 +107,10 @@ class TestKnockoffNets:
             batch_size = BATCH_SIZE
             nb_epochs = 20
         elif self.dataset == "svhn":
+            # self.x_train_victim, self.y_train_victim, self.x_test_victim, self.y_test_victim = create_image_dataset(
+            #     n_train=73257, n_test=26032, dataset="svhn")
             self.x_train_victim, self.y_train_victim, self.x_test_victim, self.y_test_victim = create_image_dataset(
-                n_train=73257, n_test=26032, dataset="svhn")
+                n_train=1000, n_test=1000, dataset="svhn")
             # _, _, self.x_train_attack, self.y_train_attack = create_image_dataset(
             #     n_train=50000, n_test=10000, dataset="imagenet")
 

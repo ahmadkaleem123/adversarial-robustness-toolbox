@@ -1022,34 +1022,39 @@ def load_svhn(
     :param raw: `True` if no preprocessing should be applied to the data. Otherwise, data is normalized to 1.
     :return: `(x_train, y_train), (x_test, y_test), min, max`
     """
+    import torchvision
+    from torchvision import transforms
+    from torch.utils.data import DataLoader
 
-    from scipy.io import loadmat
+    trainset = torchvision.datasets.SVHN(
+        root='/home/nicolas/data/svhn',
+        split='train',
+        transform=transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(
+                (0.43768212, 0.44376972, 0.47280444),
+                (0.19803013, 0.20101563, 0.19703615))]),
+        download=True)
 
-    user = getpass.getuser()
+    testset = torchvision.datasets.SVHN(
+        root='/home/nicolas/data/svhn',
+        split='test',
+        transform=transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(
+                (0.45242317, 0.45249586, 0.46897715),
+                (0.21943446, 0.22656967, 0.22850613))]),
+        download=True)
 
-    if user == 'nicolas':
-        path = "/home/nicolas/data/svhn/"
-    else:
-        path = "/ssd003/home/akaleem/data/SVHN/"
+    train_loader = DataLoader(trainset,
+                              batch_size=len(trainset))
+    x_train = next(iter(train_loader))[0].numpy()
+    y_train = next(iter(train_loader))[1].numpy()
 
-    train_raw = loadmat(path + 'train_32x32.mat')
-    test_raw = loadmat(path + 'test_32x32.mat')
-
-    # x_train = np.zeros((num_train_samples, 3, 32, 32), dtype=np.uint8)
-    # #x_train = np.zeros((num_train_samples, 1, 28, 28), dtype=np.uint8)
-    # y_train = np.zeros((num_train_samples,), dtype=np.uint8)
-
-    x_train = np.array(train_raw['X'])
-    y_train = np.array(train_raw['y'])
-
-    x_test = np.array(test_raw["X"])
-    y_test = np.array(test_raw['y'])
-
-    num_train_samples = x_train.shape[3]
-    num_test_samples = x_test.shape[3]
-
-    x_train = x_train.reshape(num_train_samples, 32, 32, 3)
-    x_test = x_test.reshape(num_test_samples, 32, 32, 3)
+    test_loader = DataLoader(testset,
+                             batch_size=len(testset))
+    x_test = next(iter(test_loader))[0].numpy()
+    y_test = next(iter(test_loader))[1].numpy()
 
     # temp1 = x_train[:, 0, :, :].reshape(x_train.shape[0], 1, 32, 32)
     # temp2 = x_train[:, 1, :, :].reshape(x_train.shape[0], 1, 32, 32)
@@ -1062,44 +1067,42 @@ def load_svhn(
     # temp3 = x_test[:, 2, :, :].reshape(x_test.shape[0], 1, 32, 32)
     # x_test = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3  # rgb to grayscale for mnist
     # x_test = x_test[:, :, 2:30, 2:30]  # convert to 28x28
-    ### USE THE TORCH METHOD HERE AS WELL.
-    import torchvision.transforms as transforms
-    import torch
-    transform_train = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.RandomCrop(32, padding=4),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize((0.43768212, 0.44376972, 0.47280444),
-                             (0.19803013, 0.20101563, 0.19703615)),
-    ])
-    transform_test = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.ToTensor(),
-        transforms.Normalize((0.43768212, 0.44376972, 0.47280444),
-                             (0.19803013, 0.20101563, 0.19703615)),
-    ])
-
-    x_traintorch = torch.zeros(num_train_samples, 32, 32, 3)
-    x_testtorch = torch.zeros(num_test_samples, 32, 32, 3)
-
-    # Set channels last
-    # x_train = x_train.transpose((0, 2, 3, 1))
-    # x_test = x_test.transpose((0, 2, 3, 1))
-    for i in range(num_train_samples):
-        temp1 = transform_train(np.squeeze(x_train[i]))
-        temp1 = torch.reshape(temp1, (32, 32, 3))
-        x_traintorch[i, :, :, :] = temp1
-    for i in range(num_test_samples):
-        temp1 = transform_test(np.squeeze(x_test[i]))
-        temp1 = torch.reshape(temp1, (32, 32, 3))
-        x_testtorch[i, :, :, :] = temp1
-    x_train = x_traintorch.numpy()
-    x_test = x_testtorch.numpy()
-    y_train = np.reshape(y_train, (len(y_train), 1))
-    y_test = np.reshape(y_test, (len(y_test), 1))
-    y_train = y_train - 1
-    y_test = y_test - 1  # svhn labels are weird
+    # ### USE THE TORCH METHOD HERE AS WELL.
+    # import torchvision.transforms as transforms
+    # import torch
+    # transform_train = transforms.Compose([
+    #     transforms.ToPILImage(),
+    #     transforms.ToTensor(),
+    #     transforms.Normalize(
+    #         (0.43768212, 0.44376972, 0.47280444),
+    #         (0.19803013, 0.20101563, 0.19703615)),
+    # ])
+    # transform_test = transforms.Compose([
+    #     transforms.ToPILImage(),
+    #     transforms.ToTensor(),
+    #     transforms.Normalize(
+    #         (0.45242317, 0.45249586, 0.46897715),
+    #         (0.21943446, 0.22656967, 0.22850613)),
+    # ])
+    #
+    # x_traintorch = np.zeros((num_train_samples, 32, 32, 3))
+    # x_testtorch = np.zeros((num_test_samples, 32, 32, 3))
+    #
+    # # Set channels last
+    # # x_train = x_train.transpose((0, 2, 3, 1))
+    # # x_test = x_test.transpose((0, 2, 3, 1))
+    # for i in range(num_train_samples):
+    #     temp1 = transform_train(np.squeeze(x_train[i])).numpy()
+    #     temp1 = temp1.transpose((1, 2, 0))
+    #     x_traintorch[i, :, :, :] = temp1
+    # for i in range(num_test_samples):
+    #     temp1 = transform_test(np.squeeze(x_test[i])).numpy()
+    #     temp1 = temp1.transpose((1, 2, 0))
+    #     x_testtorch[i, :, :, :] = temp1
+    # y_train = np.reshape(y_train, (len(y_train), 1))
+    # y_test = np.reshape(y_test, (len(y_test), 1))
+    # y_train = y_train - 1
+    # y_test = y_test - 1  # svhn labels are weird
     # y_train = y_train.astype(int)
     # y_test = y_test.astype(int)
     min_, max_ = 0.0, 1.0
