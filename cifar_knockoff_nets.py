@@ -37,7 +37,7 @@ global victim_ptc
 
 def get_acc(model, x, target):
     preds = np.argmax(model.predict(x=x), axis=1)
-    targets = np.argmax(target, axis=1)
+    targets = target.squeeze()
     count = np.sum((preds == targets).astype(int))
     acc = count / len(preds)
     return acc, preds
@@ -163,7 +163,7 @@ class TestKnockoffNets:
                 thieved_preds)
             count = 0
             for i in range(len(thieved_preds)):
-                if np.argmax(self.y_test_victim[i]) == thieved_preds[i]:
+                if self.y_test_victim[i] == thieved_preds[i]:
                     count += 1
             print("Fidelity Accuracy", acc)
             print("Standard Accuracy", count / len(thieved_preds))
@@ -195,7 +195,7 @@ class TestKnockoffNets:
                 thieved_preds)
             count = 0
             for i in range(len(thieved_preds)):
-                if np.argmax(self.y_test_victim[i]) == thieved_preds[i]:
+                if self.y_test_victim[i] == thieved_preds[i]:
                     count += 1
             print("Fidelity Accuracy", acc)
             print("Target Accuracy", count / len(thieved_preds))

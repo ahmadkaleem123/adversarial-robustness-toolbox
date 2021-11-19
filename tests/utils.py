@@ -1041,7 +1041,10 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
     elif dataset == "cifar10":
         model = resnet18()
         if load_init:
-            model.load_state_dict(torch.load("model-cifar10.pth.tar"))
+            #model.load_state_dict(torch.load("model-cifar10.pth.tar"))
+            import dfmenetwork
+            model = dfmenetwork.resnet_8x.ResNet34_8x(num_classes=10)
+            model.load_state_dict(torch.load('cifar10-resnet34_8x.pt'))
 
 
         if torch.cuda.is_available():
