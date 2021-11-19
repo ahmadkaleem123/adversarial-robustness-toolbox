@@ -1038,6 +1038,7 @@ def load_svhn(
     test_raw = loadmat(path + 'test_32x32.mat')
 
     num_train_samples = 50000
+    num_test_samples = 10000
 
     # x_train = np.zeros((num_train_samples, 3, 32, 32), dtype=np.uint8)
     # #x_train = np.zeros((num_train_samples, 1, 28, 28), dtype=np.uint8)
@@ -1049,8 +1050,8 @@ def load_svhn(
     x_test = np.array(test_raw["X"])
     y_test = np.array(test_raw['y'])
 
-    x_train = x_train.reshape(x_train.shape[3], 3, 32, 32)
-    x_test = x_test.reshape(x_test.shape[3], 3, 32, 32)
+    x_train = x_train.reshape(x_train.shape[3], 32, 32, 3)
+    x_test = x_test.reshape(x_test.shape[3], 32, 32, 3)
 
     # temp1 = x_train[:, 0, :, :].reshape(x_train.shape[0], 1, 32, 32)
     # temp2 = x_train[:, 1, :, :].reshape(x_train.shape[0], 1, 32, 32)
@@ -1085,11 +1086,11 @@ def load_svhn(
     # Set channels last
     # x_train = x_train.transpose((0, 2, 3, 1))
     # x_test = x_test.transpose((0, 2, 3, 1))
-    for i in range(1,x_train.shape[0]):
+    for i in range(1,num_train_samples):
         temp1 = transform_train(np.squeeze(x_train[i]))
         temp1 = torch.reshape(temp1, (32,32,3))
         x_traintorch[i, :, :, :] = temp1
-    for i in range(1, x_test.shape[0]):
+    for i in range(1, num_test_samples):
         temp1 = transform_test(np.squeeze(x_test[i]))
         temp1 = torch.reshape(temp1, (32, 32, 3))
         x_testtorch[i, :, :, :] = temp1

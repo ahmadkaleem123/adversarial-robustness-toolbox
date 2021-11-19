@@ -109,8 +109,8 @@ class TestKnockoffNets:
         elif self.dataset == "svhn":
             self.x_train_victim, self.y_train_victim, self.x_test_victim, self.y_test_victim = create_image_dataset(
                 n_train=50000, n_test=10000, dataset="svhn")
-            _, _, self.x_train_attack, self.y_train_attack = create_image_dataset(
-                n_train=50000, n_test=10000, dataset="imagenet")
+            # _, _, self.x_train_attack, self.y_train_attack = create_image_dataset(
+            #     n_train=50000, n_test=10000, dataset="imagenet")
 
             self.x_train_victim = np.reshape(
                 self.x_train_victim,
@@ -120,9 +120,9 @@ class TestKnockoffNets:
                 self.x_test_victim,
                 (self.x_test_victim.shape[0], 3, 32, 32)).astype(np.float32)
 
-            self.x_train_attack = np.reshape(
-                self.x_train_attack,
-                (self.x_train_attack.shape[0], 3, 32, 32)).astype(np.float32)
+            # self.x_train_attack = np.reshape(
+            #     self.x_train_attack,
+            #     (self.x_train_attack.shape[0], 3, 32, 32)).astype(np.float32)
 
             batch_size = BATCH_SIZE
             nb_epochs = 100
@@ -224,15 +224,17 @@ class TestKnockoffNets:
 
 
 if __name__ == "__main__":
-    dataset = 'cifar10'
+    #dataset = 'cifar10'
+    dataset = 'svhn'
 
     if dataset == 'cifar10':
-        train = True
+        train = False
     elif dataset == 'mnist':
         train = True
+    elif dataset == 'svhn':
+        train = False
     else:
         raise Exception(f"Unknown dataset: {dataset}")
-    train = False
     if train:
         load_init = False
     else:
@@ -240,8 +242,8 @@ if __name__ == "__main__":
 
     knockoff = TestKnockoffNets(
         train=train,
-        random=True,
-        adaptive=True,
+        random=False,
+        adaptive=False,
         dataset=dataset,
         load_init=load_init)
     knockoff.runknockoff()
