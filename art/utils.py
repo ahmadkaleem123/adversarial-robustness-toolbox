@@ -873,6 +873,34 @@ def load_cifar10(
 
     return (x_train, y_train), (x_test, y_test), min_, max_
 
+def load_imagenet(
+        raw: bool = False,
+) -> DATASET_TYPE:
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                     std=[0.229, 0.224, 0.225])
+    preprocessing = [
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        normalize,
+        transforms.Resize(28),
+        transforms.CenterCrop(28),
+        ### transforms.Grayscale() If using mnist
+    ]
+    imagenet_dataset = datasets.ImageNet(
+        root="/scratch/ssd002/datasets/imagenet256/",
+        # Path for imagenet on Vector cluster
+        split='val',
+        # 'val' for validation set, 'train' for training set. By default, 'val' is chosen.
+        transform=transforms.Compose(preprocessing))
+    ### Convert this to x_train, y_train etc. and to numpy arrays.
+    # We also only use the test set.
+    x_test = None # Update
+    y_test = None # Update
+    min_, max_ = 0.0, 1.0
+    return (None, None), (x_test, y_test), min_, max_
+
+
 
 def load_cifar100(
         raw: bool = False,
@@ -1315,6 +1343,8 @@ def load_dataset(
         return load_cifar100()
     if "svhn" in name:
         return load_svhn()
+    if "imagenet" in name:
+        return load_imagenet()
     if "stl10" in name:
         return load_stl()
     if "iris" in name:
