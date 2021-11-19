@@ -844,13 +844,13 @@ def load_cifar10(
         transforms.Normalize((0.4914, 0.4822, 0.4465),
                              (0.2023, 0.1994, 0.2010)),
     ])
-    x_traintorch = torch.zeros(50000, 32,32, 3)
+    x_traintorch = torch.zeros(50000, 32, 32, 3)
     x_testtorch = torch.zeros(10000, 32, 32, 3)
     # x_traintorch = transform_train(np.squeeze(x_train[0]))
     # x_testtorch = transform_test(np.squeeze(x_test[0]))
-    for i in range(1,x_train.shape[0]):
+    for i in range(1, x_train.shape[0]):
         temp1 = transform_train(np.squeeze(x_train[i]))
-        temp1 = torch.reshape(temp1, (32,32,3))
+        temp1 = torch.reshape(temp1, (32, 32, 3))
         x_traintorch[i, :, :, :] = temp1
     for i in range(1, x_test.shape[0]):
         temp1 = transform_test(np.squeeze(x_test[i]))
@@ -861,9 +861,6 @@ def load_cifar10(
     x_test = x_testtorch.numpy()
     x_testtorch = None
 
-
-
-
     min_, max_ = 0.0, 1.0
     # min_, max_ = 0.0, 255.0
     # if not raw:
@@ -872,6 +869,7 @@ def load_cifar10(
     #     x_test, y_test = preprocess(x_test, y_test, clip_values=(0, 255))
 
     return (x_train, y_train), (x_test, y_test), min_, max_
+
 
 def load_imagenet(
         raw: bool = False,
@@ -896,14 +894,14 @@ def load_imagenet(
         transform=transforms.Compose(preprocessing))
     ### Convert this to x_train, y_train etc. and to numpy arrays.
     # We also only use the test set.
-    train_loader = DataLoader(imagenet_dataset, batch_size=len(imagenet_dataset))
+    train_loader = DataLoader(imagenet_dataset,
+                              batch_size=len(imagenet_dataset))
     x_test = next(iter(train_loader))[0].numpy()
     y_test = next(iter(train_loader))[1].numpy()
     print("x_test", x_test.shape)
     train_loader = None  # clear memory
     min_, max_ = 0.0, 1.0
     return (None, None), (x_test, y_test), min_, max_
-
 
 
 def load_cifar100(
@@ -1037,9 +1035,6 @@ def load_svhn(
     train_raw = loadmat(path + 'train_32x32.mat')
     test_raw = loadmat(path + 'test_32x32.mat')
 
-    num_train_samples = 50000
-    num_test_samples = 10000
-
     # x_train = np.zeros((num_train_samples, 3, 32, 32), dtype=np.uint8)
     # #x_train = np.zeros((num_train_samples, 1, 28, 28), dtype=np.uint8)
     # y_train = np.zeros((num_train_samples,), dtype=np.uint8)
@@ -1050,8 +1045,11 @@ def load_svhn(
     x_test = np.array(test_raw["X"])
     y_test = np.array(test_raw['y'])
 
-    x_train = x_train.reshape(x_train.shape[3], 32, 32, 3)
-    x_test = x_test.reshape(x_test.shape[3], 32, 32, 3)
+    num_train_samples = x_train.shape[3]
+    num_test_samples = x_test.shape[3]
+
+    x_train = x_train.reshape(num_train_samples, 32, 32, 3)
+    x_test = x_test.reshape(num_test_samples, 32, 32, 3)
 
     # temp1 = x_train[:, 0, :, :].reshape(x_train.shape[0], 1, 32, 32)
     # temp2 = x_train[:, 1, :, :].reshape(x_train.shape[0], 1, 32, 32)
@@ -1073,31 +1071,31 @@ def load_svhn(
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize((0.43768212, 0.44376972, 0.47280444),
-                             (0.19803013, 0.20101563,0.19703615)),
+                             (0.19803013, 0.20101563, 0.19703615)),
     ])
     transform_test = transforms.Compose([
         transforms.ToPILImage(),
         transforms.ToTensor(),
         transforms.Normalize((0.43768212, 0.44376972, 0.47280444),
-                             (0.19803013, 0.20101563,0.19703615)),
+                             (0.19803013, 0.20101563, 0.19703615)),
     ])
-    x_traintorch = torch.zeros(50000, 32, 32, 3)
-    x_testtorch = torch.zeros(10000, 32, 32, 3)
+
+    x_traintorch = torch.zeros(num_train_samples, 32, 32, 3)
+    x_testtorch = torch.zeros(num_test_samples, 32, 32, 3)
+
     # Set channels last
     # x_train = x_train.transpose((0, 2, 3, 1))
     # x_test = x_test.transpose((0, 2, 3, 1))
-    for i in range(1,num_train_samples):
+    for i in range(num_train_samples):
         temp1 = transform_train(np.squeeze(x_train[i]))
-        temp1 = torch.reshape(temp1, (32,32,3))
+        temp1 = torch.reshape(temp1, (32, 32, 3))
         x_traintorch[i, :, :, :] = temp1
-    for i in range(1, num_test_samples):
+    for i in range(num_test_samples):
         temp1 = transform_test(np.squeeze(x_test[i]))
         temp1 = torch.reshape(temp1, (32, 32, 3))
         x_testtorch[i, :, :, :] = temp1
     x_train = x_traintorch.numpy()
-    x_traintorch = None
     x_test = x_testtorch.numpy()
-    x_testtorch = None
     y_train = np.reshape(y_train, (len(y_train), 1))
     y_test = np.reshape(y_test, (len(y_test), 1))
     y_train = y_train - 1
@@ -1708,6 +1706,7 @@ def from_cuda(x: "torch.Tensor") -> "torch.Tensor":
     if use_cuda:  # pragma: no cover
         x = x.cpu()
     return x
+
 
 if __name__ == "__main__":
     load_imagenet()

@@ -108,7 +108,7 @@ class TestKnockoffNets:
             nb_epochs = 20
         elif self.dataset == "svhn":
             self.x_train_victim, self.y_train_victim, self.x_test_victim, self.y_test_victim = create_image_dataset(
-                n_train=50000, n_test=10000, dataset="svhn")
+                n_train=73257, n_test=26032, dataset="svhn")
             # _, _, self.x_train_attack, self.y_train_attack = create_image_dataset(
             #     n_train=50000, n_test=10000, dataset="imagenet")
 
@@ -192,7 +192,8 @@ class TestKnockoffNets:
             # Create adaptive attack
 
             thieved_ptc = get_image_classifier_pt(load_init=False,
-                                                  dataset=self.dataset, adaptive=True)
+                                                  dataset=self.dataset,
+                                                  adaptive=True)
 
             print("Starting Adaptive attack")
             attack = KnockoffNets(
@@ -224,7 +225,7 @@ class TestKnockoffNets:
 
 
 if __name__ == "__main__":
-    #dataset = 'cifar10'
+    # dataset = 'cifar10'
     dataset = 'svhn'
 
     if dataset == 'cifar10':
