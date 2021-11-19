@@ -1017,7 +1017,7 @@ def is_valid_framework(framework):
 #     return krc
 
 
-def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
+def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None, adaptive=False):
     """
     Standard PyTorch classifier for unit testing.
 
@@ -1063,6 +1063,8 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
     # optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=1e-3)
     optimizer = torch.optim.SGD(model.parameters(), lr=lr,
                                momentum=0.9, weight_decay=5e-4)
+    optimizer2 = torch.optim.SGD(model.parameters(), lr=lr,
+                                momentum=0.9)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=200)
     # Get classifier
     if dataset == "mnist" or dataset == None:
@@ -1070,12 +1072,18 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
             model=model, loss=loss_fn, optimizer=optimizer,
             input_shape=(1, 28, 28), nb_classes=10, clip_values=(0, 1)
         )
-    elif dataset == "cifar10":
+    elif dataset == "cifar10" and adaptive == False:
         ptc = PyTorchClassifier(
             model=model, loss=loss_fn, optimizer=optimizer,
             input_shape=(3, 32, 32), nb_classes=10, clip_values=(0, 1),
             scheduler=scheduler
         )
+    elif dataset == "cifar10":
+        ptc = PyTorchClassifier(
+            model=model, loss=loss_fn, optimizer=optimizer2,
+            input_shape=(3, 32, 32), nb_classes=10, clip_values=(0, 1),
+            scheduler=scheduler
+    )
     return ptc
 
 
