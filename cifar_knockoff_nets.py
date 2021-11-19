@@ -81,7 +81,7 @@ class TestKnockoffNets:
                 (self.x_test_attack.shape[0], 3, 32, 32)).astype(np.float32)
 
             batch_size = BATCH_SIZE
-            nb_epochs = 20
+            nb_epochs = 100
 
         elif self.dataset == 'mnist':
             self.x_train_victim, self.y_train_victim, self.x_test_victim, self.y_test_victim = create_image_dataset(

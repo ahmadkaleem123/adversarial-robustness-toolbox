@@ -829,12 +829,49 @@ def load_cifar10(
     # Set channels last
     x_train = x_train.transpose((0, 2, 3, 1))
     x_test = x_test.transpose((0, 2, 3, 1))
+    import torchvision.transforms as transforms
+    import torch
+    transform_train = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.RandomCrop(32, padding=4),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465),
+                             (0.2023, 0.1994, 0.2010)),
+    ])
+    transform_test = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465),
+                             (0.2023, 0.1994, 0.2010)),
+    ])
+    x_traintorch = torch.zeros(50000, 32,32, 3)
+    x_testtorch = torch.zeros(10000, 32, 32, 3)
+    # x_traintorch = transform_train(np.squeeze(x_train[0]))
+    # x_testtorch = transform_test(np.squeeze(x_test[0]))
+    for i in range(1,x_train.shape[0]):
+        temp1 = transform_train(np.squeeze(x_train[i]))
+        temp1 = torch.reshape(temp1, (32,32,3))
+        x_traintorch[i, :, :, :] = temp1
+    for i in range(1, x_test.shape[0]):
+        temp1 = transform_test(np.squeeze(x_test[i]))
+        temp1 = torch.reshape(temp1, (32, 32, 3))
+        x_testtorch[i, :, :, :] = temp1
+    x_train = x_traintorch.numpy()
+    x_traintorch = None
+    x_test = x_testtorch.numpy()
+    x_testtorch = None
+    print("x train", x_train)
 
-    min_, max_ = 0.0, 255.0
-    if not raw:
-        min_, max_ = 0.0, 1.0
-        x_train, y_train = preprocess(x_train, y_train, clip_values=(0, 255))
-        x_test, y_test = preprocess(x_test, y_test, clip_values=(0, 255))
+
+
+
+    min_, max_ = 0.0, 1.0
+    # min_, max_ = 0.0, 255.0
+    # if not raw:
+    #     min_, max_ = 0.0, 1.0
+    #     x_train, y_train = preprocess(x_train, y_train, clip_values=(0, 255))
+    #     x_test, y_test = preprocess(x_test, y_test, clip_values=(0, 255))
 
     return (x_train, y_train), (x_test, y_test), min_, max_
 

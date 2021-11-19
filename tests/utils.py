@@ -1053,13 +1053,13 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None):
             #             output_device=device_ids)
             model = torch.nn.DataParallel(module=model, device_ids=device_ids)
 
-        lr = 0.1
+        lr = 0.01
 
     # Define a loss function and optimizer
     loss_fn = torch.nn.CrossEntropyLoss(reduction="mean")  # sum
-    # optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    # optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=1e-3)
     optimizer = torch.optim.SGD(model.parameters(), lr=lr,
-                                momentum=0.9, weight_decay=5e-4)
+                               momentum=0.9, weight_decay=5e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=200)
     # Get classifier
     if dataset == "mnist" or dataset == None:
