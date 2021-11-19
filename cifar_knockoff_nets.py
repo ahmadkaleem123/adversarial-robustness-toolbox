@@ -30,7 +30,7 @@ from tests.utils import get_image_classifier_pt
 logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 128
-NB_STOLEN = 1000
+NB_STOLEN = 2000
 f = open("logs.txt", "w")
 global victim_ptc
 
