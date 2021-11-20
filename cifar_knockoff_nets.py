@@ -30,7 +30,7 @@ from tests.utils import get_image_classifier_pt
 logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 128
-NB_STOLEN = 4000
+NB_STOLEN = 10000
 f = open("logs.txt", "w")
 global victim_ptc
 
@@ -229,8 +229,8 @@ class TestKnockoffNets:
 
 
 if __name__ == "__main__":
-    # dataset = 'cifar10'
-    dataset = 'svhn'
+    dataset = 'cifar10'
+    #dataset = 'svhn'
 
     if dataset == 'cifar10':
         train = False
