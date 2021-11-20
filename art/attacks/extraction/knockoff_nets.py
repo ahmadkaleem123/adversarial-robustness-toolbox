@@ -219,10 +219,6 @@ class KnockoffNets(ExtractionAttack):
             nb_actions = len(np.unique(y))
         else:
             raise ValueError("Target values `y` has a wrong shape.")
-        # if self.dataset in ["mnist", "cifar10"]:
-        #     nb_actions = 10
-        # else:
-        #     nb_actions = 1000
         # We need to keep an average version of the victim output
         if self.reward == "div" or self.reward == "all":
             self.y_avg = np.zeros(self.estimator.nb_classes)
@@ -342,7 +338,6 @@ class KnockoffNets(ExtractionAttack):
         # rnd_idx = np.random.choice(len(x_index))
         x_index = np.where(y_index == action)[0]
         rnd_idx = np.random.choice(x_index, 1)[0]
-        # Our indices are not correct (they are relative indices and not over the whole dataset
         return rnd_idx
 
     def _reward(self, y_output: np.ndarray, y_hat: np.ndarray, n: int) -> float:
