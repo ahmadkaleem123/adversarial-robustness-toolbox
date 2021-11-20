@@ -882,10 +882,12 @@ def load_imagenet(
                                      std=[0.229, 0.224, 0.225])
     if dataset == "mnist":
         preprocessing = [
-            transforms.Resize(28),
-            transforms.CenterCrop(28),
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
             transforms.ToTensor(),
             normalize,
+            transforms.Resize(28),
+            transforms.CenterCrop(28),
             transforms.Grayscale()
         ]
     else:
@@ -972,27 +974,63 @@ def load_mnist(
     :param raw: `True` if no preprocessing should be applied to the data. Otherwise, data is normalized to 1.
     :return: `(x_train, y_train), (x_test, y_test), min, max`.
     """
-    path = get_file(
-        "mnist.npz",
-        path=config.ART_DATA_PATH,
-        url="https://s3.amazonaws.com/img-datasets/mnist.npz",
-    )
+    from torchvision import datasets, transforms
+    import torch
+    from torch.utils.data import DataLoader
+    user = getpass.getuser()
+    if user == 'nicolas':
+        path = "/home/nicolas/data/"
+    else:
+        path = "/ssd003/home/akaleem/data"
+    trainset = datasets.MNIST(
+        root=path,
+        train=True,
+        transform=transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(
+                (0.13251461,), (0.31048025,))]),
+        download=False)
 
-    dict_mnist = np.load(path)
-    x_train = dict_mnist["x_train"]
-    y_train = dict_mnist["y_train"]
-    x_test = dict_mnist["x_test"]
-    y_test = dict_mnist["y_test"]
-    dict_mnist.close()
+    testset = datasets.MNIST(
+        root=path,
+        train=False,
+        transform=transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(
+                (0.13251461,), (0.31048025,))]),
+        download=False)
 
-    # Add channel axis
-    min_, max_ = 0.0, 255.0
-    if not raw:
-        min_, max_ = 0.0, 1.0
-        x_train = np.expand_dims(x_train, axis=3)
-        x_test = np.expand_dims(x_test, axis=3)
-        x_train, y_train = preprocess(x_train, y_train)
-        x_test, y_test = preprocess(x_test, y_test)
+    train_loader = DataLoader(trainset,
+                              batch_size=len(trainset))
+    x_train = next(iter(train_loader))[0].numpy()
+    y_train = next(iter(train_loader))[1].numpy()
+
+    test_loader = DataLoader(testset,
+                             batch_size=len(testset))
+    x_test = next(iter(test_loader))[0].numpy()
+    y_test = next(iter(test_loader))[1].numpy()
+    min_, max_ = 0.0, 1.0
+    # path = get_file(
+    #     "mnist.npz",
+    #     path=config.ART_DATA_PATH,
+    #     url="https://s3.amazonaws.com/img-datasets/mnist.npz",
+    # )
+    #
+    # dict_mnist = np.load(path)
+    # x_train = dict_mnist["x_train"]
+    # y_train = dict_mnist["y_train"]
+    # x_test = dict_mnist["x_test"]
+    # y_test = dict_mnist["y_test"]
+    # dict_mnist.close()
+    #
+    # # Add channel axis
+    # min_, max_ = 0.0, 255.0
+    # if not raw:
+    #     min_, max_ = 0.0, 1.0
+    #     x_train = np.expand_dims(x_train, axis=3)
+    #     x_test = np.expand_dims(x_test, axis=3)
+    #     x_train, y_train = preprocess(x_train, y_train)
+    #     x_test, y_test = preprocess(x_test, y_test)
 
     return (x_train, y_train), (x_test, y_test), min_, max_
 

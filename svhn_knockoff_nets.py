@@ -30,8 +30,7 @@ from tests.utils import get_image_classifier_pt
 logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 128
-NB_STOLEN = 8000
-f = open("logs.txt", "w")
+NB_STOLEN = 1500
 global victim_ptc
 
 
@@ -63,8 +62,7 @@ class TestKnockoffNets:
                 n_train=50000, n_test=10000, dataset="cifar10")
             self.x_train_attack, self.y_train_attack, self.x_test_attack, self.y_test_attack = create_image_dataset(
                 n_train=50000, n_test=10000, dataset="cifar100")
-            # _, _, self.x_train_attack, self.y_train_attack = create_image_dataset(
-            #     n_train=50000, n_test=10000, dataset="imagenet")
+
             self.x_train_victim = np.reshape(
                 self.x_train_victim,
                 (self.x_train_victim.shape[0], 3, 32, 32)).astype(np.float32)
@@ -76,6 +74,10 @@ class TestKnockoffNets:
             self.x_train_attack = np.reshape(
                 self.x_train_attack,
                 (self.x_train_attack.shape[0], 3, 32, 32)).astype(np.float32)
+
+            self.x_test_attack = np.reshape(
+                self.x_test_attack,
+                (self.x_test_attack.shape[0], 3, 32, 32)).astype(np.float32)
 
             batch_size = BATCH_SIZE
             nb_epochs = 100
@@ -130,8 +132,6 @@ class TestKnockoffNets:
                                              load_init=self.load_init)
         if self.train:
             print("Starting Training")
-            f.write("Starting training\n")
-            f.flush()
 
             victim_ptc.fit_test(  # train the victim and save
                 x=self.x_train_victim,
@@ -187,7 +187,6 @@ class TestKnockoffNets:
                     count += 1
             print("Fidelity Accuracy", acc)
             print("Standard Accuracy", count / len(thieved_preds))
-            f.write(f"Random accuracy: {count / len(thieved_preds)}")
         if self.testadaptive:
             # Create adaptive attack
 
@@ -221,14 +220,11 @@ class TestKnockoffNets:
                     count += 1
             print("Fidelity Accuracy", acc)
             print("Target Accuracy", count / len(thieved_preds))
-            f.write(f"Adaptive accuracy: {count / len(thieved_preds)}")
-        f.close()
 
 
 if __name__ == "__main__":
-    dataset = 'cifar10'
-    #dataset = 'svhn'
-
+    dataset = 'svhn'
+    print("USING SVHN VICTIM MODEL")
     if dataset == 'cifar10':
         train = False
     elif dataset == 'mnist':

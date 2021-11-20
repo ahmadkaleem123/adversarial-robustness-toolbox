@@ -233,7 +233,7 @@ class KnockoffNets(ExtractionAttack):
         learning_rate = np.zeros(nb_actions)
         probs = np.ones(
             nb_actions) / nb_actions  # corresponds to pi in the paper
-        # print("nb actions", nb_actions)
+        #print("nb actions", nb_actions)
         selected_idx = []
         queried_labels = []
 
@@ -255,6 +255,8 @@ class KnockoffNets(ExtractionAttack):
             fake_label = np.argmax(y_output, axis=1)
             fake_label = to_categorical(labels=fake_label,
                                         nb_classes=self.estimator.nb_classes)
+            # print("np.expand_dims(x[rnd_idx], axis=0)", np.expand_dims(x[rnd_idx], axis=0))
+            # print("fake", fake_label)
             queried_labels.append(fake_label[0])
 
             # Train the thieved classifier
@@ -278,7 +280,7 @@ class KnockoffNets(ExtractionAttack):
             # Update learning rate
             learning_rate[
                 action] += 1  # Actually corresponds to N(z) in the paper so the name is rather misleading. The learning rate specified in the paper is 1/learning_rate as they have in the code below
-            # print("h before ", h_func)
+            #print("h before ", h_func)
             # Update H function
             for i_action in range(nb_actions):
                 if i_action != action:
@@ -295,7 +297,7 @@ class KnockoffNets(ExtractionAttack):
             # Update probs
             aux_exp = np.exp(
                 h_func)  # probs can become NaN from here. H_func is the first to get nan values.
-            # print("h ", h_func)
+            #print("h ", h_func)
             # print("aux", aux_exp)
             # as long as h_func does not grow too large, probs should be fine because it is normalized so all values are between 0 and 1.
             # print("aux", aux_exp)

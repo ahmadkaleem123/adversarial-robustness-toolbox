@@ -200,6 +200,13 @@ def create_image_dataset(n_train, n_test, dataset):
         y_train = None
         x_test = x_test_imagenet[:n_train]
         y_test = y_test_imagenet[:n_train]
+    elif dataset == "imagenetother":
+        (_, _), (
+            x_test_imagenet, y_test_imagenet), _, _ = load_dataset("imagenetother")
+        x_train = None
+        y_train = None
+        x_test = x_test_imagenet[:n_train]
+        y_test = y_test_imagenet[:n_train]
     return x_train, y_train, x_test, y_test
 
 

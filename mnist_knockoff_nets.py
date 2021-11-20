@@ -30,14 +30,15 @@ from tests.utils import get_image_classifier_pt
 logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 128
-NB_STOLEN = 8000
+NB_STOLEN = 2000
 f = open("logs.txt", "w")
 global victim_ptc
 
 
 def get_acc(model, x, target):
     preds = np.argmax(model.predict(x=x), axis=1)
-    targets = target.squeeze()
+    #targets = np.argmax(target, axis=1)
+    targets = target
     count = np.sum((preds == targets).astype(int))
     acc = count / len(preds)
     return acc, preds
@@ -84,8 +85,8 @@ class TestKnockoffNets:
             self.x_train_victim, self.y_train_victim, self.x_test_victim, self.y_test_victim = create_image_dataset(
                 n_train=60000, n_test=10000, dataset="mnist")
 
-            self.x_train_attack, self.y_train_attack, self.x_test_attack, self.y_test_attack = create_image_dataset(
-                n_train=60000, n_test=10000, dataset="svhn")
+            _, _, self.x_train_attack, self.y_train_attack = create_image_dataset(
+                n_train=50000, n_test=10000, dataset="imagenetother")
 
             self.x_train_victim = np.reshape(self.x_train_victim, (
                 self.x_train_victim.shape[0], 1, 28, 28)).astype(np.float32)
@@ -97,9 +98,6 @@ class TestKnockoffNets:
             self.x_train_attack = np.reshape(
                 self.x_train_attack, (
                     self.x_train_attack.shape[0], 1, 28, 28)).astype(np.float32)
-            self.x_test_attack = np.reshape(
-                self.x_test_attack,
-                (self.x_test_attack.shape[0], 1, 28, 28)).astype(np.float32)
 
             batch_size = BATCH_SIZE
             nb_epochs = 20
@@ -226,13 +224,12 @@ class TestKnockoffNets:
 
 
 if __name__ == "__main__":
-    dataset = 'cifar10'
-    #dataset = 'svhn'
+    dataset = 'mnist'
 
     if dataset == 'cifar10':
         train = False
     elif dataset == 'mnist':
-        train = True
+        train = False
     elif dataset == 'svhn':
         train = False
     else:
@@ -244,7 +241,7 @@ if __name__ == "__main__":
 
     knockoff = TestKnockoffNets(
         train=train,
-        random=True,
+        random=False,
         adaptive=True,
         dataset=dataset,
         load_init=load_init)
