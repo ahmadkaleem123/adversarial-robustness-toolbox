@@ -30,7 +30,7 @@ from tests.utils import get_image_classifier_pt
 logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 128
-NB_STOLEN = 10000
+NB_STOLEN = 2000
 f = open("logs.txt", "w")
 global victim_ptc
 
@@ -63,7 +63,8 @@ class TestKnockoffNets:
                 n_train=50000, n_test=10000, dataset="cifar10")
             self.x_train_attack, self.y_train_attack, self.x_test_attack, self.y_test_attack = create_image_dataset(
                 n_train=50000, n_test=10000, dataset="cifar100")
-
+            print("self y", self.y_train_attack)
+            print("lejn", len(np.unique(self.y_train_attack)))
             self.x_train_victim = np.reshape(
                 self.x_train_victim,
                 (self.x_train_victim.shape[0], 3, 32, 32)).astype(np.float32)

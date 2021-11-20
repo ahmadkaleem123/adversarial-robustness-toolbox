@@ -921,66 +921,44 @@ def load_cifar100(
     :param raw: `True` if no preprocessing should be applied to the data. Otherwise, data is normalized to 1.
     :return: `(x_train, y_train), (x_test, y_test), min, max`
     """
+    from torchvision import datasets, transforms
+    import torch
+    from torch.utils.data import DataLoader
+    user = getpass.getuser()
+    if user == 'nicolas':
+        path = "/home/nicolas/data/"
+    else:
+        path = "/ssd003/home/akaleem/data"
+    trainset = datasets.CIFAR100(
+    root=path,
+    train=True,
+    transform=transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(
+            (0.4914, 0.4822, 0.4465),
+            (0.247, 0.243, 0.2616))]),
+    download=False)
 
-    def load_batch(fpath: str) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Utility function for loading CIFAR batches, as written in Keras.
+    testset = datasets.CIFAR100(
+        root=path,
+        train=False,
+        transform=transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(
+                (0.4914, 0.4822, 0.4465),
+                (0.247, 0.243, 0.2616))]),
+        download=False)
 
-        :param fpath: Full path to the batch file.
-        :return: `(data, labels)`
-        """
-        with open(fpath, "rb") as file_:
-            if sys.version_info < (3,):
-                content = six.moves.cPickle.load(file_)
-            else:
-                content = six.moves.cPickle.load(file_, encoding="bytes")
-                content_decoded = {}
-                for key, value in content.items():
-                    content_decoded[key.decode("utf8")] = value
-                content = content_decoded
-        data = content["data"]
-        labels = content["labels"]
+    train_loader = DataLoader(trainset,
+                              batch_size=len(trainset))
+    x_train = next(iter(train_loader))[0].numpy()
+    y_train = next(iter(train_loader))[1].numpy()
 
-        data = data.reshape(data.shape[0], 3, 32, 32)
-        # temp1 = data[:, 0, :, :].reshape(data.shape[0], 1, 32, 32)
-        # temp2 = data[:, 1, :, :].reshape(data.shape[0], 1, 32, 32)
-        # temp3 = data[:, 2, :, :].reshape(data.shape[0], 1, 32, 32)
-        # data = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3 # rgb to grayscale for mnist
-        # data = data[:, :, 2:30, 2:30] # convert to 28x28
-        return data, labels
-
-    path = get_file(
-        "cifar-10-batches-py",
-        extract=True,
-        path=config.ART_DATA_PATH,
-        url="http://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz",
-    )
-
-    num_train_samples = 50000
-
-    x_train = np.zeros((num_train_samples, 3, 32, 32), dtype=np.uint8)
-    y_train = np.zeros((num_train_samples,), dtype=np.uint8)
-
-    for i in range(1, 6):
-        fpath = os.path.join(path, "data_batch_" + str(i))
-        data, labels = load_batch(fpath)
-        x_train[(i - 1) * 10000: i * 10000, :, :, :] = data
-        y_train[(i - 1) * 10000: i * 10000] = labels
-
-    fpath = os.path.join(path, "test_batch")
-    x_test, y_test = load_batch(fpath)
-    y_train = np.reshape(y_train, (len(y_train), 1))
-    y_test = np.reshape(y_test, (len(y_test), 1))
-
-    # Set channels last
-    x_train = x_train.transpose((0, 2, 3, 1))
-    x_test = x_test.transpose((0, 2, 3, 1))
-
-    min_, max_ = 0.0, 255.0
-    if not raw:
-        min_, max_ = 0.0, 1.0
-        x_train, y_train = preprocess(x_train, y_train, clip_values=(0, 255))
-        x_test, y_test = preprocess(x_test, y_test, clip_values=(0, 255))
+    test_loader = DataLoader(testset,
+                             batch_size=len(testset))
+    x_test = next(iter(test_loader))[0].numpy()
+    y_test = next(iter(test_loader))[1].numpy()
+    min_, max_ = 0.0, 1.0
 
     return (x_train, y_train), (x_test, y_test), min_, max_
 
@@ -1349,9 +1327,9 @@ def load_dataset(
     """
     if "mnist" in name:
         return load_mnist()
-    if "cifar10" in name:
+    if name == "cifar10":
         return load_cifar10()
-    if "cifar100" in name:
+    if name == "cifar100":
         return load_cifar100()
     if "svhn" in name:
         return load_svhn()
