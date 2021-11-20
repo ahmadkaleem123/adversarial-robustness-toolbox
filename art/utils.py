@@ -935,6 +935,9 @@ def load_cifar100(
     root=path,
     train=True,
     transform=transforms.Compose([
+        transforms.Pad(4),
+        transforms.RandomCrop(32),
+        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(
             (0.4914, 0.4822, 0.4465),
@@ -945,11 +948,19 @@ def load_cifar100(
         root=path,
         train=False,
         transform=transforms.Compose([
+            transforms.Pad(4),
+            transforms.RandomCrop(32),
+            transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize(
                 (0.4914, 0.4822, 0.4465),
                 (0.247, 0.243, 0.2616))]),
         download=False)
+
+    # If we use mnist here
+    # preprocessing.append(transforms.Resize(28))
+    # preprocessing.append(transforms.CenterCrop(28))
+    # preprocessing.append(transforms.Grayscale())
 
     train_loader = DataLoader(trainset,
                               batch_size=len(trainset))

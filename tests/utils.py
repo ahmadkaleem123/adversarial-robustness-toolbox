@@ -1048,7 +1048,7 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None, ada
     # Define the network
     if dataset == None or dataset == "mnist":
         model = MnistNet()
-        lr = 0.1
+        lr = 0.01
         if load_init:
             model.load_state_dict(torch.load("model-mnist.pth.tar"))
 
