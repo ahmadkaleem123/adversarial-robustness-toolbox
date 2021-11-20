@@ -873,19 +873,28 @@ def load_cifar10(
 
 def load_imagenet(
         raw: bool = False,
+        dataset = "svhn",
 ) -> DATASET_TYPE:
     from torchvision import datasets, transforms
     import torch
     from torch.utils.data import DataLoader
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
-    preprocessing = [
-        transforms.Resize(32),
-        transforms.CenterCrop(32),
-        transforms.ToTensor(),
-        normalize,
-        ### transforms.Grayscale() If using mnist
-    ]
+    if dataset == "mnist":
+        preprocessing = [
+            transforms.Resize(28),
+            transforms.CenterCrop(28),
+            transforms.ToTensor(),
+            normalize,
+            transforms.Grayscale()
+        ]
+    else:
+        preprocessing = [
+            transforms.Resize(32),
+            transforms.CenterCrop(32),
+            transforms.ToTensor(),
+            normalize,
+        ]
     imagenet_dataset = datasets.ImageNet(
         root="/scratch/ssd002/datasets/imagenet256/",
         # Path for imagenet on Vector cluster
@@ -898,7 +907,6 @@ def load_imagenet(
                               batch_size=len(imagenet_dataset))
     x_test = next(iter(train_loader))[0].numpy()
     y_test = next(iter(train_loader))[1].numpy()
-    print("x_test", x_test.shape)
     train_loader = None  # clear memory
     min_, max_ = 0.0, 1.0
     return (None, None), (x_test, y_test), min_, max_
@@ -1025,9 +1033,14 @@ def load_svhn(
     import torchvision
     from torchvision import transforms
     from torch.utils.data import DataLoader
+    user = getpass.getuser()
 
+    if user == 'nicolas':
+        path = "/home/nicolas/data/svhn/"
+    else:
+        path = "/ssd003/home/akaleem/data/SVHN/"
     trainset = torchvision.datasets.SVHN(
-        root='/home/nicolas/data/svhn',
+        root=path,
         split='train',
         transform=transforms.Compose([
             transforms.ToTensor(),
@@ -1037,7 +1050,7 @@ def load_svhn(
         download=True)
 
     testset = torchvision.datasets.SVHN(
-        root='/home/nicolas/data/svhn',
+        root=path,
         split='test',
         transform=transforms.Compose([
             transforms.ToTensor(),
@@ -1343,7 +1356,10 @@ def load_dataset(
     if "svhn" in name:
         return load_svhn()
     if "imagenet" in name:
-        return load_imagenet()
+        if "other" in name:
+            return load_imagenet(dataset="mnist")
+        else:
+            return load_imagenet()
     if "stl10" in name:
         return load_stl()
     if "iris" in name:

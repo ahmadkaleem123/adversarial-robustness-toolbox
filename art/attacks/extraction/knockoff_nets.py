@@ -72,6 +72,7 @@ class KnockoffNets(ExtractionAttack):
             reward: str = "all",
             verbose: bool = True,
             use_probability: bool = False,
+            dataset="svhn"
     ) -> None:
         """
         Create a KnockoffNets attack instance. Note, it is assumed that both the victim classifier and the thieved
@@ -96,6 +97,7 @@ class KnockoffNets(ExtractionAttack):
         self.reward = reward
         self.verbose = verbose
         self.use_probability = use_probability
+        self.dataset = dataset
         self._check_params()
 
     def extract(self, x: np.ndarray, y: Optional[np.ndarray] = None,

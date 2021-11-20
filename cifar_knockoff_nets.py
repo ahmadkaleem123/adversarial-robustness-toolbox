@@ -30,7 +30,7 @@ from tests.utils import get_image_classifier_pt
 logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 128
-NB_STOLEN = 1000
+NB_STOLEN = 4000
 f = open("logs.txt", "w")
 global victim_ptc
 
@@ -174,6 +174,7 @@ class TestKnockoffNets:
                 nb_stolen=NB_STOLEN,
                 sampling_strategy="random",
                 verbose=True,
+                dataset=self.dataset
             )
 
             thieved_ptc = attack.extract(x=self.x_train_attack,
@@ -207,6 +208,7 @@ class TestKnockoffNets:
                 sampling_strategy="adaptive",
                 reward="all",
                 verbose=True,
+                dataset=self.dataset
             )
             thieved_ptc = attack.extract(x=self.x_train_attack,
                                          y=self.y_train_attack,
