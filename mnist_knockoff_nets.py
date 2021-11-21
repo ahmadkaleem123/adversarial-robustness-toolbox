@@ -30,7 +30,7 @@ from tests.utils import get_image_classifier_pt
 logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 64
-NB_STOLEN = 10000
+NB_STOLEN = 6000
 global victim_ptc
 
 
@@ -208,9 +208,9 @@ class TestKnockoffNets:
 
             thieved_preds = np.argmax(
                 thieved_ptc.predict(x=self.x_test_victim), axis=1)
-            print("thieved", thieved_preds)
-            print("test", self.y_test_victim)
-            print("victim", victim_preds_test)
+            # print("thieved", thieved_preds)
+            # print("test", self.y_test_victim)
+            # print("victim", victim_preds_test)
             acc = np.sum(victim_preds_test == thieved_preds) / len(
                 thieved_preds)
             count = 0

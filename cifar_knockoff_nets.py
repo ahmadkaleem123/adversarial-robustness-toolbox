@@ -29,9 +29,8 @@ from tests.utils import get_image_classifier_pt
 
 logger = logging.getLogger(__name__)
 
-BATCH_SIZE = 128
-NB_STOLEN = 24000
-f = open("logs.txt", "w")
+BATCH_SIZE = 64
+NB_STOLEN = 10000
 global victim_ptc
 
 
@@ -130,9 +129,6 @@ class TestKnockoffNets:
                                              load_init=self.load_init)
         if self.train:
             print("Starting Training")
-            f.write("Starting training\n")
-            f.flush()
-
             victim_ptc.fit_test(  # train the victim and save
                 x=self.x_train_victim,
                 y=self.y_train_victim,
@@ -187,7 +183,6 @@ class TestKnockoffNets:
                     count += 1
             print("Fidelity Accuracy", acc)
             print("Standard Accuracy", count / len(thieved_preds))
-            f.write(f"Random accuracy: {count / len(thieved_preds)}")
         if self.testadaptive:
             # Create adaptive attack
 
@@ -221,8 +216,6 @@ class TestKnockoffNets:
                     count += 1
             print("Fidelity Accuracy", acc)
             print("Target Accuracy", count / len(thieved_preds))
-            f.write(f"Adaptive accuracy: {count / len(thieved_preds)}")
-        f.close()
 
 
 if __name__ == "__main__":

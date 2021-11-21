@@ -1090,7 +1090,7 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None, ada
 
     # Define a loss function and optimizer
     loss_fn = torch.nn.CrossEntropyLoss(reduction="mean")  # sum
-    #optimizer3 = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer4 = torch.optim.Adam(model.parameters(), lr=lr)
     optimizer3 = torch.optim.SGD(model.parameters(), lr=lr,
                                 momentum=0.5)
     optimizer = torch.optim.SGD(model.parameters(), lr=lr,
