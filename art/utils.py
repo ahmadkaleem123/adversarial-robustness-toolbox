@@ -793,9 +793,9 @@ def load_cifar10(
         data = content["data"]
         labels = content["labels"]
         data = data.reshape(data.shape[0], 3, 32, 32)
-        temp1 = data[:, 0, :, :].reshape(data.shape[0], 1, 32, 32)
-        temp2 = data[:, 1, :, :].reshape(data.shape[0], 1, 32, 32)
-        temp3 = data[:, 2, :, :].reshape(data.shape[0], 1, 32, 32)
+        # temp1 = data[:, 0, :, :].reshape(data.shape[0], 1, 32, 32)
+        # temp2 = data[:, 1, :, :].reshape(data.shape[0], 1, 32, 32)
+        # temp3 = data[:, 2, :, :].reshape(data.shape[0], 1, 32, 32)
         # Add these back when using mnist
         # data = 0.2989 * temp1 + 0.587 * temp2 * 0.114 * temp3 # rgb to grayscale for mnist
         # data = data[:, :, 2:30, 2:30] # convert to 28x28

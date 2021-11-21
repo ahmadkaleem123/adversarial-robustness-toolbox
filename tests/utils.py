@@ -1090,7 +1090,9 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None, ada
 
     # Define a loss function and optimizer
     loss_fn = torch.nn.CrossEntropyLoss(reduction="mean")  # sum
-    # optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=1e-3)
+    #optimizer3 = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer3 = torch.optim.SGD(model.parameters(), lr=lr,
+                                momentum=0.5)
     optimizer = torch.optim.SGD(model.parameters(), lr=lr,
                                momentum=0.9, weight_decay=5e-4)
     optimizer2 = torch.optim.SGD(model.parameters(), lr=lr,
@@ -1099,7 +1101,7 @@ def get_image_classifier_pt(from_logits=False, load_init=True, dataset=None, ada
     # Get classifier
     if dataset == "mnist" or dataset == None:
         ptc = PyTorchClassifier(
-            model=model, loss=loss_fn, optimizer=optimizer,
+            model=model, loss=loss_fn, optimizer=optimizer3,
             input_shape=(1, 28, 28), nb_classes=10, clip_values=(0, 1)
         )
     elif dataset in ["cifar10", "svhn"] and adaptive == False:
