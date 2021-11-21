@@ -799,9 +799,6 @@ def load_cifar10(
         root=path,
         train=False,
         transform=transforms.Compose([
-            transforms.Pad(4),
-            transforms.RandomCrop(32),
-            transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize(
                 (0.4914, 0.4822, 0.4465),
