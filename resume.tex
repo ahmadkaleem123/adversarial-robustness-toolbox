@@ -1,0 +1,321 @@
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\usepackage{fontawesome}
+\input{glyphtounicode}
+
+
+%----------FONT OPTIONS----------
+% sans-serif
+% \usepackage[sfdefault]{FiraSans}
+% \usepackage[sfdefault]{roboto}
+% \usepackage[sfdefault]{noto-sans}
+% \usepackage[default]{sourcesanspro}
+
+% serif
+% \usepackage{CormorantGaramond}
+% \usepackage{charter}
+
+
+\pagestyle{plain}
+%\fancyhf{} % clear all header and footer fields
+%\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% Ensure that generate pdf is machine readable/ATS parsable
+\pdfgentounicode=1
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+      %{\small#3} & {\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubSubheading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \textit{\small#1} & \textit{\small #2} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeActivityHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      #1 & #2 \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+\newcommand{\RN}[1]{%
+  \textup{\uppercase\expandafter{\romannumeral#1}}%
+}
+
+%-------------------------------------------
+%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+%----------HEADING----------
+% \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+%   \textbf{\href{http://sourabhbajaj.com/}{\Large Sourabh Bajaj}} & Email : \href{mailto:sourabh@sourabhbajaj.com}{sourabh@sourabhbajaj.com}\\
+%   \href{http://sourabhbajaj.com/}{http://www.sourabhbajaj.com} & Mobile : +1-123-456-7890 \\
+% \end{tabular*}
+
+\begin{center}
+    \textbf{\huge Muhammad Ahmad Kaleem} \\ \vspace{1.75pt}
+    \faInbox \hspace{0.07cm} \href{mailto:ahmad.kaleem@mail.utoronto.ca}{\underline{ahmad.kaleem@mail.utoronto.ca}} $|$
+    \faLinkedin  \hspace{0.07cm} \href{https://www.linkedin.com/in/ahmad-kaleem-74b02216b/}{\underline{Ahmad Kaleem}} $|$
+    \faGithub  \hspace{0.07cm} \href{https://github.com/ahmadkaleem123}{\underline{ahmadkaleem123}} $ | $ Canadian Citizen
+\end{center}
+
+
+%-----------EDUCATION-----------
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {University of Toronto}{Toronto, CA}
+      {Bachelor of Applied Science in Engineering Science (CGPA 3.92/4.0, 93 \% average)}{Sep. 2020 - Present}
+    \begin{itemize}
+        \item \small{Dean's Honour List (Fall 2020, Winter 2021)}
+    \end{itemize}
+    % \resumeSubheading
+    %  {Homeschooled}{Lahore, PK}
+    %  {O Levels (5 A*), A Levels (3 A*)}{Aug. 2016 - Jun. 2020}
+  \resumeSubHeadingListEnd
+
+
+%-----------EXPERIENCE-----------
+\section{Experience}
+  \resumeSubHeadingListStart
+
+
+% -----------Multiple Positions Heading-----------
+%    \resumeSubSubheading
+%     {Software Engineer I}{Oct 2014 - Sep 2016}
+%     \resumeItemListStart
+%        \resumeItem{Apache Beam}
+%          {Apache Beam is a unified model for defining both batch and streaming data-parallel processing pipelines}
+%     \resumeItemListEnd
+%    \resumeSubHeadingListEnd
+%-------------------------------------------
+
+  \resumeActivityHeading
+  {\textbf{Research Intern at CleverHans Lab}}{May 2021 -- Present}
+
+  \resumeItemListStart
+        \resumeItem{Work on the privacy and security of Machine Learning}
+        \resumeItem{Contributions towards two research projects and their related academic papers}
+        \resumeItem{Implementation of algorithms including state of the art methods and code for experiments in Pytorch and Python}
+        \resumeItem{Data Visualization and reporting of experimental results using Python}
+        \resumeItem{Theoretical Contributions in terms of ideas and mathematical proofs}
+        \resumeItem{Under the supervision of Prof. Nicolas Papernot}
+  \resumeItemListEnd
+
+    \resumeActivityHeading
+    {\textbf{Olympiad Mathematics}}{September 2014 -- Present}
+%      \resumeItemListStart
+%        %\resumeItem{Selected as one of the six members in Team Pakistan to participate in the International Math Olympiad 2019 in the UK and the International Math
+%        %Olympiad 2020 in Russia (virtual) after an year long selection process consisting of several camps and tests}
+%        \resumeItem{International Mathematical Olympiad: Member of Team Pakistan in 2019 and 2020}
+%        \item{Honourable Mention in 2020}
+%        \resumeItem{Won Honourable Mentions in the International Math Olmypiad 2020 and the Asian Pacific Math Olympiad in 2019 and 2020 which was one of the competitions used in the selection process}
+%        \resumeItem{Participated in the Tournament of Towns Mathematics Competition (a challenging olympiad style contest) which takes places four times an year from Grade 6 to Grade 12}
+%        \resumeItem{Attend weekly Putnam training sessions at the University of Toronto where problems from the Putnam Competition and other sources are discussed
+%        and solved collaboratively}
+%    \resumeItemListEnd
+
+    \begin{itemize}
+        \item \small{International Mathematical Olympiad: Member of Team Pakistan (2019, 2020)} \vspace{-2pt}
+        \begin{itemize}
+            \item \small{Honourable Mention (2020)} \vspace{-3pt}
+            \item \small {Attended several camps involving tests and group problem solving sessions as part of the team selection process}
+        \end{itemize}
+        \item \small {Asian Pacific Mathematical Olympiad: Member of Team Pakistan (2019, 2020)} \vspace{-2pt}
+        \begin{itemize}
+            \item \small{Honourable Mention (2019, 2020)} \vspace{-3pt}
+        \end{itemize}
+        \item \small {Tournament of Towns: Participant (2014-2020)} \vspace{-2pt}
+         \begin{itemize}
+            \item \small{Group \RN{2} Award (2017-2020)} \vspace{-2pt}
+            \item \small{Group \RN{3} Award (2016)} \vspace{-3pt}
+        \end{itemize}
+
+        \item \small {Putnam Competition: Participant (2020)}
+        \begin{itemize}
+          \item \small {Score of 19 in 2020 (top 500)}
+          \item \small {Attend weekly training sessions at UofT where problems are discussed collaboratively}
+        \end{itemize}
+      %   \item \small {Attend weekly Putnam training sessions at the University of Toronto where problems from the Putnam Competition and other sources are discussed
+      %  and solved collaboratively}
+      %  \begin{itemize}
+      %   \item \small{Participated in the Putnam Competition 2020 (Score: 19)} \vspace{-3pt}
+      % \end{itemize}
+
+    \end{itemize}
+
+    \vspace{-7pt}
+    \resumeActivityHeading
+      {\textbf{University of Toronto Hyperloop Team}}{September 2020 -- February 2021}
+      \resumeItemListStart
+        \resumeItem{Member of the electronics subteam}
+        \resumeItem{Created circuit layouts and programs for the use of various sensors}
+      \resumeItemListEnd
+
+      \resumeActivityHeading
+      {\textbf{Volunteer at Makeistan - Pakistan's first academic makerspace}}{September 2016 -- July 2019}
+      \resumeItemListStart
+        \resumeItem{Volunteered at weekly Arduino nights helping teach the basics of circuits and programming with Arduino through different projects to a wide variety of students ranging from middle school students to graduate students}
+        \resumeItem{Led workshops on Arduino projects, 3D modeling, App Development, Lego Robotics and methods to solve the Rubiks Cube at the makerspace}
+        \resumeItem{Went as a volunteer with Makeistan to several universities and schools to conduct workshops on Arduino}
+        \resumeItem{Represented Makeistan at events such as Makerfest Lahore 2017 and Lahore Science Mela 2018}
+      \resumeItemListEnd
+
+    %   \resumeActivityHeading
+    % {\textbf{Online Courses} $|$ \emph{Coursera, Udacity, Edx, MIT OpenCourseWare}}{September 2016 -- Present}
+    %   \resumeItemListStart
+    %     \resumeItem{Have completed various online courses related to math, electronics and computer science}
+    %     %\resumeItem{Introduction to Probability and Statistics Part 1 (MIT on Edx), Grade: 68 \%}
+    %     \resumeItem{Introduction to Probability and Statistics Part 2 (MIT on Edx), Grade: 95 \%}
+    %     \resumeItem{Machine Learning by Andrew Ng (Coursera), Grade: 95 \%}
+    %     \resumeItem{Paradox and Infinity (MIT on Edx), Grade: 95 \%}
+    %     \resumeItem{Introduction to Self Driving Cars (Coursera), Grade: 97 \%}
+    %     \resumeItem{Introduction to TensorFlow, Neural Networks and Deep Learning on Coursera}
+    %     \resumeItem{Artificial Intelligence for Robotics (Udacity)}
+    %     \resumeItem{18.02 (Multivariable Calculus), 18.03 (Differential Equations), 18.06 (Linear Algebra) and 6.006 (Algorithms) on MIT OpenCourseWare}
+    %   \resumeItemListEnd
+
+
+
+  \resumeSubHeadingListEnd
+
+
+%-----------PROJECTS-----------
+\section{Projects}
+    \resumeSubHeadingListStart
+      \resumeProjectHeading
+        {\textbf{Neural Network to Predict Future Cases and Deaths from COVID 19}}{April 2020 -- May 2020}
+          \resumeItemListStart
+          %\resumeItem{Used data from the Pakistan government Covid database and processed the data to feed into a Recurrent Neural Network}
+          \resumeItem{Processed data from the Pakistan government Covid database to be used with a Recurrent Neural Network}
+          \resumeItem{Trained the Neural Network using TensorFlow and predicted case numbers and deaths for the future accurate to within 200 cases for two weeks}
+      \resumeItemListEnd
+      \resumeProjectHeading
+          {\textbf{Arduino Based Drone}}{September 2018 -- February 2020}
+          \resumeItemListStart
+            \resumeItem{Worked on the design and created several iterations of the drone base using different materials}
+            \resumeItem{Created the circuit configuration using an Arduino microcontroller and MOSFETS, soldered the components}
+            \resumeItem{Implemented a PID controller to control the speeds of the motors based on the input from the gyro sensor effectively stabilizing the drone}
+          \resumeItemListEnd
+      \resumeProjectHeading
+          {\textbf{Neural Network to Calculate Focus Levels of Children with ADHD}} {September 2019 -- December 2019}
+          \resumeItemListStart
+            \resumeItem{Trained a Convolutional Neural Network using TensorFlow to classify images taken regularly by a camera on the user's head into the activity being performed}
+            \resumeItem{Compared the classified activities with a premade schedule to calculate focus levels}
+            \resumeItem{Program allows for a schedule to be created and focus levels to be viewed at the end of each day}
+          \resumeItemListEnd
+
+    \resumeProjectHeading
+        {\textbf{Device to Reduce Water Wastage in Domestic Car Washes}}{October 2018 -- December 2018}
+        \resumeItemListStart
+          \resumeItem{Used an Arduino and a Raspberry Pi along with servo motors and a laser module to replicate the process of washing a car with the light representing water being turned on}
+          \resumeItem{Used MATLAB to analyze the image of the car taken using the Raspberry Pi camera and subsequently to control the servo motors and the laser light to minimize the amount of time the water was turned on}
+          \resumeItem{Data collected and analyzed to calculate potential water savings}
+
+        \resumeItemListEnd
+    \resumeSubHeadingListEnd
+
+%\section{Awards}
+%
+%%\resumeItemListStart
+%  %\resumeItem{Honourable Mention in the International Math Olympiad (2020)}
+%  %\resumeItem{Honourable Mention in the Asian Pacific Math Olympiad (2019, 2020)}
+%  %\resumeItem{Group \RN{2} Award }
+%%\resumeItemListEnd
+%\begin{itemize}[leftmargin=0.35in]
+%  \small{\item Honourable Mention in the International Math Olympiad (2020)}
+%  \vspace{-0.2cm}
+%  \small{\item Honourable Mention in the Asian Pacific Math Olympiad (2019, 2020)}
+%  \vspace{-0.2cm}
+%  \small{\item Group \RN{2} Award in Tournament of Towns (2017-2020)}
+%  \vspace{-0.2cm}
+%  \small{ \item Group \RN{3} Award in Tournament of Towns (2016)}
+%  \vspace{-0.2cm}
+%\end{itemize}
+
+\section{Publications}
+
+\begin{itemize}[leftmargin=0.35in]
+  \small{\item Increasing the Cost of Model Extraction with Calibrated Proof of Work (Under Review)} %\href{https://openreview.net/forum?id=EAy7C1cgE1L}{\underline{OpenReview}}}
+  \small{\item Private Multi-Winner Voting for Machine Learning (Under Review)} %\href{https://openreview.net/forum?id=JedTK_aOaRa}{\underline{OpenReview}}}
+  \small{\item On Algorithms for Solving the Rubik's Cube. \href{https://arxiv.org/abs/2007.10829}{\underline{arXiv:2007.10829}}}
+  \vspace{-0.2cm}
+\end{itemize}
+\section{Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Languages}{: English (Native), Urdu (Native), French (Proficient), Arabic (Basic)} \\
+     \textbf{Programming Languages}{: Python, C/C++, MATLAB, Verilog, ARM Assembly} \\
+     \textbf{Tools \& Technologies}{: \LaTeX, Adobe Premiere Pro, Pytorch, Tensorflow, Arduino, Raspberry Pi, LTSpice, Git} \\
+     \textbf{Knowledge}{: Mathematics, Machine Learning and Data Science, Statistics, Electronics} \\
+    }}
+ \end{itemize}
+
+
+%-------------------------------------------
+\end{document}
