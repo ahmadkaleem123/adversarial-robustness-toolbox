@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.6.29) (preloaded format=pdflatex 2020.8.22)  29 AUG 2021 08:33
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.6.29) (preloaded format=pdflatex 2020.8.22)  1 DEC 2021 00:25
 entering extended mode
 **"c:/Users/Ahmad/Desktop/Ahmad Resume/resume.tex"
 ("c:/Users/Ahmad/Desktop/Ahmad Resume/resume.tex"
@@ -301,15 +301,15 @@ LaTeX Font Info:    External font `cmex10' loaded for size
  [1
 
 {C:/Users/Ahmad/AppData/Local/MiKTeX/pdftex/config/pdftex.map}]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 319.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 321.
  [2]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 319.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 321.
  ("c:/Users\Ahmad\Desktop\Ahmad Resume\resume.aux")
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 319.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 319.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 321.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 321.
 Package rerunfilecheck Info: File `resume.out' has not changed.
 (rerunfilecheck)             Checksum: 6FF8DDF8A4F97BE2DE66A84B5B08DE1E;220.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 319.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 321.
  ) 
 Here is how much of TeX's memory you used:
  8480 strings out of 480790
@@ -318,9 +318,9 @@ Here is how much of TeX's memory you used:
  24348 multiletter control sequences out of 15000+200000
  538581 words of font info for 48 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 37i,7n,45p,308b,522s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 37i,7n,45p,308b,518s stack positions out of 5000i,500n,10000p,200000b,50000s
  <C:\Users\Ahmad\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1000.pk>{C:/Users/Ahmad/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/fontawesome/fontawesometwo.enc}<C:/Users/Ahmad/AppData/Local/Programs/MiKTeX/fonts/type1/public/fontawesome/FontAwesome.pfb><C:/Users/Ahmad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/Ahmad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/Ahmad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmcsc10.pfb><C:/Users/Ahmad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/Ahmad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/Ahmad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/Ahmad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/Ahmad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on "c:/Users\Ahmad\Desktop\Ahmad Resume\resume.pdf" (2 pages, 134423 bytes).
+Output written on "c:/Users\Ahmad\Desktop\Ahmad Resume\resume.pdf" (2 pages, 131800 bytes).
 PDF statistics:
  94 PDF objects out of 1000 (max. 8388607)
  8 named destinations out of 1000 (max. 500000)
